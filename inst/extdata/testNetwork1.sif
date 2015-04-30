@@ -1,0 +1,8 @@
+Node0	Activates	Node1
+Node0	Inhibits	Node2
+Node1	Activates	Node3
+Node1	Activates	Node4
+Node1	Inhibits	Node5
+Node2	Inhibits	Node5
+Node2	Activates	Node6
+Node2	Activates	Node7

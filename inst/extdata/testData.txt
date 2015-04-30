@@ -1,0 +1,10 @@
+NodeA	1
+NodeB	-1
+NodeC	1
+NodeD	-1
+NodeE	1
+NodeF	-1
+NodeG	1
+NodeH	-1
+NodeI	1
+NodeJ	-1
