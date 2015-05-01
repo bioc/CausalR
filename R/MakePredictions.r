@@ -25,11 +25,11 @@ MakePredictions <- function(hypothesisnode, signOfHypothesis, network, delta, no
   # (as an integer node ID or name, including + or - for up/down regulation in the case of a CCG).
   # The signOfHypothesis variable should be a 1 or -1, indicating up/down regulation.
   
-  if (network$isCCG){
-    predictions <- MakePredictionsFromCCG(hypothesisnode, signOfHypothesis, network, delta, nodesInExperimentalData)
-  }
-  else{
-    predictions <- MakePredictionsFromCG(hypothesisnode, signOfHypothesis, network, delta, nodesInExperimentalData)
-  }
+  #if (network$isCCG){
+  predictions <- MakePredictionsFromCCG(hypothesisnode,    signOfHypothesis, network, delta, nodesInExperimentalData)
+  #}
+  #else{
+  #  predictions <- MakePredictionsFromCG(hypothesisnode, signOfHypothesis, network, delta, nodesInExperimentalData)
+  #}
   return(predictions)
 }

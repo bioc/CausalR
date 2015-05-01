@@ -264,9 +264,12 @@ RankTheHypotheses(ccg, experimentalData, 2, listOfNodes='Node0')
 
 It may first be useful to check on node content and length of the shortest path from the proposed hypothesis (root) node to any specific (outcome) target node(s) of interest. For this the function {\tt GetShortestPathsFromCCG()} is employed,
 
-<<>>=
+<<results='hide'>>=
 GetShortestPathsFromCCG(ccg, 'Node0', 'Node3')
 @
+
+{\tt node0+ node1+ node3+}
+\vspace{3mm}
 
 An alternative to {\tt RankTheHypotheses()} enables acquisition of further detail on the breakdown of scoring contributions. The {\tt MakePredictionsFromCCG()} function can be used directly to get scores for a particular signed hypothesis of a node, 
 
@@ -508,6 +511,7 @@ subset(Rankfor4,Correct>=4)
 
 This can also be useful where the user wishes to employ the more computationally expensive exact (cubic) algorithm on a subset of interesting hypotheses, instead of using the (default) approximation algorithm.
 
+\newpage
 
 \section{Sequential Causal Analysis of Networks (SCAN)}
 
@@ -517,7 +521,7 @@ Given that true causal regulators are likely to regulate nodes at various distan
 
 By invoking the {\tt runSCANR()} function \textit{CausalR} is iteratively run for a range of path lengths ({\tt deltas}), starting  from {\tt delta=1} up to the value of the user-supplied variable {\tt NumberOfDeltaToScan} (default is 5), to discover nodes that consistently score in the highest  {\tt topNumGenes} (default is 150) across all SCAN deltas run.
 
-\vspace{5 mm}
+\vspace{8 mm}
 
 So for example given the following experimental data,
 
@@ -534,7 +538,9 @@ NodeI	1
 NodeJ	-1
 \end{verbatim}
 
-and a more complex network, as in the {\tt Cytoscape} (\textit{http:www.cytoscape.org}) depiction of {\tt testnet.sif} in Figure 3 below),
+\vspace{5 mm}
+
+and a more complex network, as in the {\tt Cytoscape} (\textit{http:www.cytoscape.org}) depiction of {\tt testnet.sif} in Figure 3 below).
 
 \begin{figure}[ht]
  \includegraphics[width=120mm,scale=1.0]{Fig3.png}
@@ -542,7 +548,11 @@ and a more complex network, as in the {\tt Cytoscape} (\textit{http:www.cytoscap
  \label{fig:f3}
 \end{figure}
 
+\vspace{5mm}
+
 The {\tt runSCANR()} function will first write the number of nodes to analyse to the R console window (this will be repeated for each delta run). Then the next {\tt NumberOfDeltaToScan} lines output will list the top hypotheses from each delta that was run, whilst the final line gives the ScanR results for the top hypotheses in common between these deltas. 
+
+\vspace{5mm}
 
 <<>>=
 runSCANR(system.file( "extdata", "testNetwork.sif", 
@@ -552,14 +562,14 @@ runSCANR(system.file( "extdata", "testNetwork.sif",
 @
 
 Line [1] is the top scoring 4 hypotheses from delta 1 \\
-Line [2] is the top scoring 3 hypotheses from delta 2 \\
+Line [2] is the top scoring 4 hypotheses from delta 2 \\
 Line [3] is the SCANR results, i.e. the hypotheses in common between the sets of top ranked ones coming from each delta.
 
 \vspace{5mm}
 
 From experiments with \textit{CausalR} on signals for known pathways (see Bradley \textit{et al.}\cite{tobeSubmitted}), setting of the {\tt topNumGenes} parameter to represent 1 percent of the number of nodes present in the input network provides a reliable starting heuristic for identifying the true regulators.
 
-\newpage
+\vspace{5mm}
 
 Typically a full SCAN execution can take overnight with large inputs and larger deltas. However, various steps can be taken to improve run times:
 
