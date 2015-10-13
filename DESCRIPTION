@@ -1,7 +1,7 @@
 Package: CausalR
 Type: Package
 Title: Causal Reasoning on Biological Networks
-Version: 0.99.13
+Version: 1.0.0
 Date: 2014-04-9
 Author: Glyn Bradley, Steven Barrett, David Wiley, Bhushan Bonde, Peter
         Woollard, Chirag Mistry, David Riley
