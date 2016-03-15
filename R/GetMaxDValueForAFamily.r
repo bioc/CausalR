@@ -17,29 +17,26 @@
 #' BMC Bioinformatics, 13(35), 2012.
 
 
-  
-  GetMaxDValueForAFamily <- function(r_p, r_m, c_p, predictionListStats, experimentalDataStats, 
-                                   logOfFactorialOfPredictionListStats, returnlog = FALSE){
-  # t
-  total <- r_p + r_m
-  
-  # Compute the values of n++, n+-, n-+ and n-- that maximise the D-value; 
-  # these correspond to the following formula: n_ab is approximately equal to
-  # q_a*n_b/T, where T = q+ + q- + q0 = n+ + n- + n0, and a,b are either + or -.
-  # See  Assessing statistical significance in causal graphs, page 6.
-  # We need integer values and we need to respect the row and column totals; 
-  # achieve this by rounding n_pp up (arbitrarily) and calculate the other values
-  # to get the right totals.
-  if (total > 0){
-    n_pp <- ceiling(r_p*c_p/total)
-    n_pm <- r_p - n_pp
-    n_mp <- c_p - n_pp
-    n_mm <- r_m - n_mp
-    maximumDFamValue <- GetApproximateMaximumDValueFromTwoByTwoContingencyTable(n_pp, n_pm, n_mp, n_mm, predictionListStats, experimentalDataStats,logOfFactorialOfPredictionListStats, returnlog)
-  }
-  else{
-    maximumDFamValue <- GetApproximateMaximumDValueFromTwoByTwoContingencyTable(0, 0, 0, 0, predictionListStats, experimentalDataStats,logOfFactorialOfPredictionListStats, returnlog)
-  }
-  
-  return(maximumDFamValue)
-}
+
+GetMaxDValueForAFamily <- function(r_p, r_m, c_p, predictionListStats, experimentalDataStats, logOfFactorialOfPredictionListStats, returnlog = FALSE) {
+    # t
+    total <- r_p + r_m
+    
+    # Compute the values of n++, n+-, n-+ and n-- that maximise the D-value; these correspond to the following formula: n_ab is approximately equal to
+    # q_a*n_b/T, where T = q+ + q- + q0 = n+ + n- + n0, and a,b are either + or -.  See Assessing statistical significance in causal graphs, page 6.  We
+    # need integer values and we need to respect the row and column totals; achieve this by rounding n_pp up (arbitrarily) and calculate the other
+    # values to get the right totals.
+    if (total > 0) {
+        n_pp <- ceiling(r_p * c_p/total)
+        n_pm <- r_p - n_pp
+        n_mp <- c_p - n_pp
+        n_mm <- r_m - n_mp
+        maximumDFamValue <- GetApproximateMaximumDValueFromTwoByTwoContingencyTable(n_pp, n_pm, n_mp, n_mm, predictionListStats, experimentalDataStats, 
+            logOfFactorialOfPredictionListStats, returnlog)
+    } else {
+        maximumDFamValue <- GetApproximateMaximumDValueFromTwoByTwoContingencyTable(0, 0, 0, 0, predictionListStats, experimentalDataStats, logOfFactorialOfPredictionListStats, 
+            returnlog)
+    }
+    
+    return(maximumDFamValue)
+} 

@@ -6,11 +6,11 @@
 #' @param scoresMatrix a matrix containing the scores for each node of the network
 #' @return a ranked table of hypotheses
 
-OrderHypotheses <- function(scoresMatrix){
-
-tableOfScores <- as.table(scoresMatrix)
-# Order in descending order
-orderedTable <- tableOfScores[order(-1*(as.numeric(tableOfScores[,3]))),]
-
-return(orderedTable)
-}
+OrderHypotheses <- function(scoresMatrix) {
+    
+    tableOfScores <- as.table(scoresMatrix)
+    # Order in descending order
+    orderedTable <- tableOfScores[order(-1 * (as.numeric(tableOfScores[, 3]))), ]
+    
+    return(orderedTable)
+} 

@@ -9,16 +9,17 @@
 #' @param numPredictions  number of predictions
 #' @return prediction statistics
 #' @export
+#' @concept CausalR
 #' @examples
-#' network <- system.file(package="CausalR", "extdata", "testNetwork.sif")
+#' network <- system.file(package='CausalR', 'extdata', 'testNetwork.sif')
 #' ccg <- CreateCCG(network)
-#' predictions <- MakePredictions("NodeA", +1, ccg, 2)
+#' predictions <- MakePredictions('NodeA', +1, ccg, 2)
 #' AnalysePredictionsList(predictions,8)
 
-AnalysePredictionsList <- function(predictionsList,numPredictions){
-
-  predictionsListStats <- GetNumberOfPositiveAndNegativeEntries(predictionsList)
-  predictionsListStats[3] <- numPredictions - (predictionsListStats[1] + predictionsListStats[2])
-  
-  return(predictionsListStats)
-}
+AnalysePredictionsList <- function(predictionsList, numPredictions) {
+    
+    predictionsListStats <- GetNumberOfPositiveAndNegativeEntries(predictionsList)
+    predictionsListStats[3] <- numPredictions - (predictionsListStats[1] + predictionsListStats[2])
+    
+    return(predictionsListStats)
+} 

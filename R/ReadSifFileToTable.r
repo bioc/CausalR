@@ -4,11 +4,11 @@
 #' @param sifFile the sifFile to be read in 
 #' @return a R table containing the data from the .sif file
 
-ReadSifFileToTable <- function(sifFile){
-
-table <- read.table(sifFile, colClasses = "character")
-
-ValidateFormatOfTable(table)
-
-return(table) 
-}
+ReadSifFileToTable <- function(sifFile) {
+    
+    table <- utils::read.table(sifFile, colClasses = "character")
+    
+    ValidateFormatOfTable(table)
+    
+    return(table)
+} 

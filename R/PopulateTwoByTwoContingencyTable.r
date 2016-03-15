@@ -15,24 +15,23 @@
 #' Causal reasoning on biological networks: Interpreting transcriptional changes.
 #' Bioinformatics, 28(8):1114-21, 2012.   
 
-PopulateTwoByTwoContingencyTable <- function(rowAndColumnSumValues,n_pp){
-
-# r+
-r_p <- rowAndColumnSumValues[1]
-# r-
-r_m <- rowAndColumnSumValues[2]
-# c+
-c_p <- rowAndColumnSumValues[3]
-# c-
-c_m <- rowAndColumnSumValues[4]
-
-#n+-
-n_pm <- r_p - n_pp
-#n-+
-n_mp <- c_p - n_pp
-#n--
-n_mm <- r_m - n_mp
-
-contingencyTableValues <- c(n_pp, n_pm, n_mp, n_mm)
-return(contingencyTableValues)
-}
+PopulateTwoByTwoContingencyTable <- function(rowAndColumnSumValues, n_pp) {
+    
+    # r+
+    r_p <- rowAndColumnSumValues[1]
+    # r-
+    r_m <- rowAndColumnSumValues[2]
+    # c+
+    c_p <- rowAndColumnSumValues[3]
+    # c- c_m <- rowAndColumnSumValues[4]
+    
+    # n+-
+    n_pm <- r_p - n_pp
+    # n-+
+    n_mp <- c_p - n_pp
+    # n--
+    n_mm <- r_m - n_mp
+    
+    contingencyTableValues <- c(n_pp, n_pm, n_mp, n_mm)
+    return(contingencyTableValues)
+} 

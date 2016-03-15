@@ -6,8 +6,8 @@
 #' @return connectedNodesInExperimentalData a list of connected nodes with the redundant nodes removed
 
 
-RemoveIDsNotInExperimentalData <- function(connectedNodes, nodesInExperimentalData){
-
-connectedNodesInExperimentalData <- intersect(connectedNodes, nodesInExperimentalData)
-return(connectedNodesInExperimentalData)
-}
+RemoveIDsNotInExperimentalData <- function(connectedNodes, nodesInExperimentalData) {
+    
+    connectedNodesInExperimentalData <- intersect(connectedNodes, nodesInExperimentalData)
+    return(connectedNodesInExperimentalData)
+} 

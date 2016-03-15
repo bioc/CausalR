@@ -20,6 +20,7 @@
 \usepackage[toc,page]{appendix}
 \usepackage[backend=bibtex8]{biblatex}
 
+
 \parskip=0.8mm
 \parindent=0pt
 
@@ -126,13 +127,13 @@ These triples represent the network to be used in the example processing,
 
 \begin{verbatim}
 Node0 Activates Node1
-Node0	Inhibits	Node2
-Node1	Activates	Node3
-Node1	Activates	Node4
-Node1	Inhibits	Node5
-Node2	Inhibits	Node5
-Node2	Activates	Node6
-Node2	Activates	Node7
+Node0    Inhibits    Node2
+Node1    Activates    Node3
+Node1    Activates    Node4
+Node1    Inhibits    Node5
+Node2    Inhibits    Node5
+Node2    Activates    Node6
+Node2    Activates    Node7
 \end{verbatim}
 
 %\vspace{5mm}
@@ -140,16 +141,16 @@ Node2	Activates	Node7
 Each line triple represents a directed edge in the input network of Figure 1,
 
 \begin{figure}[ht]
- \includegraphics{Fig1.png}
- \caption{ Example input network. }
- \label{fig:f1}
+    \includegraphics{Fig1.png}
+    \caption{ Example input network. }
+    \label{fig:f1}
 \end{figure}
 
 This is read from tab-separated (Cytoscape {\tt .sif} format) file by one of two user functions, {\tt CreateCG()} or {\tt CreateCCG()} which respectively create and store either a  causal or a computational causal graph. To understand what these are we first show how the function {\tt CreateCG()} is used to create an internal representation of the network as a Causal Graph (CG).
 
 <<>>=
 cg <- CreateCG(system.file( "extdata", "testNetwork1.sif", 
-                                          package="CausalR"))
+    package="CausalR"))
 @
 
 The CG is stored in the workspace as an \textit{igraph} object,  which is a particular type of object that can be used to store and process graphs in R (see \textit{http://igraph.org/r/doc/igraph.pdf} ). The Causal Graph can then be visualised via,
@@ -166,7 +167,7 @@ The {\tt CreateCCG()} function creates in the workspace an \textit{igraph} objec
 
 <<>>=
 ccg <- CreateCCG(system.file( "extdata", "testNetwork1.sif", 
-                                          package="CausalR"))
+    package="CausalR"))
 @
 
 The latter is employed internally instead of a CG for processing efficiency. 
@@ -183,14 +184,14 @@ PlotGraphWithNodeNames(ccg) # producing the following graph.
 The input differential experimental results (used in subsequent worked examples) is as follows,
 
 \begin{verbatim}
-Node0 1
-Node1	1
-Node2	1
-Node3	1
-Node4	0
-Node5	-1
-Node6	-1
-Node7	-1 
+Node0    1
+Node1    1
+Node2    1
+Node3    1
+Node4    0
+Node5    -1
+Node6    -1
+Node7    -1
 \end{verbatim}
 
 In the second column, 1 represents differential activation, -1 differential inhibition and 0 indicates no differential regulation was observed for the entity represented by the node. 
@@ -206,7 +207,7 @@ A tab-separated file containing this content is read into the workspace using {\
 
 <<>>=
 experimentalData <- ReadExperimentalData(system.file( "extdata", 
-                         "testData1.txt", package="CausalR"),ccg)
+                        "testData1.txt", package="CausalR"),ccg)
 @
 
 At this stage checks are performed to identify entities (nodes) not present within the CG/CCG.
@@ -220,7 +221,7 @@ These are flagged to the user and excluded from the two column experimental data
 \section{Computing Score: Multiple Causal Hypotheses}
 
 
-To compute a list of score-ranked hypotheses (as in Table 1) within an interactive session, the user would employ the {\tt RankTheHypotheses()} function as follows, 
+To compute a list of score-ranked hypotheses (as in Table 1) within an interactive session, the user would employ the {\tt RankTheHypotheses()} function (see Appendix B instructions for running in parallel) as follows, 
 
 {\scriptsize
 <<>>=
@@ -503,7 +504,7 @@ This can be avoided by resetting the {\tt correctPredictionsThreshold} value use
 <<>>=
 options(width=120)
 Rankfor4<-RankTheHypotheses(ccg, experimentalData, 2, 
-                              correctPredictionsThreshold=4)
+                            correctPredictionsThreshold=4)
 Rankfor4   # For example output only
 subset(Rankfor4,Correct>=4)
 @
@@ -526,16 +527,16 @@ By invoking the {\tt runSCANR()} function \textit{CausalR} is iteratively run fo
 So for example given the following experimental data,
 
 \begin{verbatim}
-NodeA  1
-NodeB  -1
-NodeC	1
-NodeD	-1
-NodeE	1
-NodeF	-1
-NodeG	1
-NodeH	-1
-NodeI	1
-NodeJ	-1
+NodeA    1
+NodeB    -1
+NodeC    1
+NodeD    -1
+NodeE    1
+NodeF    -1
+NodeG    1
+NodeH    -1
+NodeI    1
+NodeJ    -1
 \end{verbatim}
 
 \vspace{5 mm}
@@ -543,9 +544,9 @@ NodeJ	-1
 and a more complex network, as in the {\tt Cytoscape} (\textit{http:www.cytoscape.org}) depiction of {\tt testnet.sif} in Figure 3 below).
 
 \begin{figure}[ht]
- \includegraphics[width=120mm,scale=1.0]{Fig3.png}
- \caption{ Network input for SCAN Example. }
- \label{fig:f3}
+    \includegraphics[width=120mm,scale=1.0]{Fig3.png}
+    \caption{ Network input for SCAN Example. }
+    \label{fig:f3}
 \end{figure}
 
 \vspace{5mm}
@@ -555,10 +556,8 @@ The {\tt runSCANR()} function will first write the number of nodes to analyse to
 \vspace{5mm}
 
 <<>>=
-runSCANR(system.file( "extdata", "testNetwork.sif", 
-      package="CausalR"),system.file( "extdata", "testData.txt", 
-      package="CausalR"),NumberOfDeltaToScan=2,
-      topNumGenes=4, correctPredictionsThreshold=1)
+runSCANR(ccg, experimentalData, NumberOfDeltaToScan=2, topNumGenes=4,
+         correctPredictionsThreshold=1)
 @
 
 Line [1] is the top scoring 4 hypotheses from delta 1 \\
@@ -574,21 +573,22 @@ From experiments with \textit{CausalR} on signals for known pathways (see Bradle
 Typically a full SCAN execution can take overnight with large inputs and larger deltas. However, various steps can be taken to improve run times:
 
 \begin{enumerate}
-  \item Use of the R compiler (see Appendix B)
-  \item Excluding scoring of hypotheses for non-differential nodes,
+    \item Use of the R compiler (see Appendix B)
+    \item Excluding scoring of hypotheses for non-differential nodes,
 
 
 <<eval=FALSE>>=
 AllData<-read.table(file="testData1.txt", sep = "\t")
 DifferentialData<-AllData[AllData[,2]!=0,]
 write.table(DifferentialData, file="DifferentialData.txt", 
-  sep="\t", row.names=FALSE, col.names=FALSE, quote=FALSE)
-runSCANR("testNetwork1.sif", "DifferentialData.txt", 
-         NumberOfDeltaToScan=2,topNumGenes=100,
-         correctPredictionsThreshold=2)
+    sep="\t", row.names=FALSE, col.names=FALSE, quote=FALSE)
+
+runSCANR(ccg, ReadExperimentalData("DifferentialData.txt", ccg), 
+        NumberOfDeltaToScan=2,topNumGenes=100,
+        correctPredictionsThreshold=2)
 @
 
-  \item Suppression of significance calculations. Note that these will be inaccurate and unused anyway if non-differential results are excluded, as with \textit{SCAN} we are relying more upon biological logic rather statistics. This can be achieved via the correctPredictionsThreshold parameter, which has a  default of 4 that can be overridden  to  higher value (scores will still be computed for all hypotheses).
+\item Suppression of significance calculations. Note that these will be inaccurate and unused anyway if non-differential results are excluded, as with \textit{SCAN} we are relying more upon biological logic rather statistics. This can be achieved via the correctPredictionsThreshold parameter, which has a  default of 4 that can be overridden  to  higher value (scores will still be computed for all hypotheses).
 \end{enumerate}
 
 Accurate p-values and pE-values can later be computed separately for the subset of interesting hypotheses coming from \textit{SCAN}  using,
@@ -603,6 +603,52 @@ which gives up- and down-regulated hypothesis results for each named input node 
 \vspace{5 mm}
 
 Alternatively, for an individual signed node hypothesis, the user can start from {\tt MakePredictionsFromCCG() } as described earlier under  section "Calculating Score for a Specific Causal Hypothesis".
+
+\newpage
+
+\section{Visualising the Network of Nodes explained by a Specific Hypothesis}
+
+The function {\tt WriteExplainedNodesToSifFile()} allows production of a network of explained nodes, for a particular hypothesis, in .sif file format for visualising in Cytoscape. The function is called as follows: \\ 
+
+<<eval=FALSE>>=
+WriteExplainedNodesToSifFile("IL1A", +1, ccg, experimentalData, 
+                                       delta, file="testOutput")
+@
+
+This will produce a .sif file {\tt testOutput.sif} representing all of the explained nodes (i.e. nodes that have the same direction of regulation in both the network and the experimental data under the hypothesis of up-regulated IL1A), with content structured as follows: 
+
+%\vspace{5mm}
+
+\begin{verbatim}
+IL1A  Activates  ATF3
+IL1A  Activates  BDKRB1
+IL1A  Activates  BIRC2
+IL1A  Activates  CEBPD
+IL1A  Inhibits   CAMLG
+IL1A  Inhibits   TIMP4
+\end{verbatim}
+
+%\vspace{5mm}
+
+A corresponding annotation file {\tt testOutput\_anno.txt} is also created. This file contains the explained node regulation values, 
+
+%\vspace{5mm}
+
+\begin{verbatim}
+NodeID  Regulation
+ATF3       1
+BDKRB1     1
+BIRC2      1
+CEBPD      1
+IL1A       1
+CAMLG      -1
+TIMP4      -1
+\end{verbatim}
+
+%\vspace{5mm}
+
+These files can be loaded into Cytoscape to visualise the explained nodes.
+
 
 \newpage
 
@@ -622,7 +668,7 @@ Statistical Methods for Research Workers. Oliver \& Boyd.
 
 \bibitem{GOEAST} Zheng, Q. and Wang, X-J. (2008)
 GOEAST: a web-based software toolkit for Gene Ontology enrichment analysis. Nucleic Acids Research, 36, W358--W363. 
-  
+
 \end{thebibliography}
 
 
@@ -641,15 +687,15 @@ library(CausalR)
 library(igraph)
 
 # Load network, create CG and plot
-
 cg <- CreateCG('testNetwork1.sif')
+
 PlotGraphWithNodeNames(cg)
 @
 
 <<results='hide'>>=
 # Load network, create CCG and plot
 ccg <- CreateCCG(system.file( "extdata", "testNetwork1.sif", 
-                                          package="CausalR"))
+    package="CausalR"))
 @
 <<eval=FALSE>>=
 PlotGraphWithNodeNames(ccg)
@@ -658,12 +704,19 @@ PlotGraphWithNodeNames(ccg)
 <<results='hide'>>=
 # Load experimental data
 experimentalData <- ReadExperimentalData(system.file( "extdata",
-                         "testData1.txt", package="CausalR"),ccg)
+                        "testData1.txt", package="CausalR"),ccg)
 @
 
 <<results='hide'>>=
 # Make predictions for all hypotheses, with pathlength set to 2.
 RankTheHypotheses(ccg, experimentalData, 2)
+@
+
+
+<<eval=FALSE>>=
+# Make predictions for all hypotheses, running in parallel
+# NOTE: this requires further set-up as detailed in Appendix B.
+RankTheHypotheses(ccg,experimentalData,delta,doParallel=TRUE)
 @
 
 <<results='hide'>>=
@@ -700,29 +753,29 @@ CalculateSignificance(Score, predictions, experimentalData)
 PreexperimentalDataStats <-
     GetNumberOfPositiveAndNegativeEntries(experimentalData)
 
-  #this gives integer values for n_+ and n_- for the 
-  #experimental data,as shown in Table 2.
+    #this gives integer values for n_+ and n_- for the 
+    #experimental data,as shown in Table 2.
 
-  PreexperimentalDataStats
+    PreexperimentalDataStats
 
-  # add required value for n_0, number of non-differential
-  # experimental results,
-  experimentalDataStats<-c(PreexperimentalDataStats,1)
-  # then use,
-  AnalysePredictionsList(predictions,8)
-  # ...to output integer values q_+, q_- and q_0 for
-  #    significance calculations (see Table 2)
-  # then store this in the workspace for later use,
-  predictionListStats<-AnalysePredictionsList(predictions,8)
+    # add required value for n_0, number of non-differential
+    # experimental results,
+    experimentalDataStats<-c(PreexperimentalDataStats,1)
+    # then use,
+    AnalysePredictionsList(predictions,8)
+    # ...to output integer values q_+, q_- and q_0 for
+    #    significance calculations (see Table 2)
+    # then store this in the workspace for later use,
+    predictionListStats<-AnalysePredictionsList(predictions,8)
 @
 
 <<eval=FALSE>>=
 # Compute Significance p-value using default cubic algorithm
 CalculateSignificance(Score,predictionListStats, 
-              experimentalDataStats, useCubicAlgorithm=TRUE)
+    experimentalDataStats, useCubicAlgorithm=TRUE)
 # or simply,
 CalculateSignificance(Score,predictionListStats, 
-                                experimentalDataStats)
+    experimentalDataStats)
 # as use cubic algorithm is the default setting.
 @
 
@@ -743,36 +796,80 @@ CalculateEnrichmentPvalue(predictions, experimentalData)
 AllData<-read.table(file="testData1.txt", sep="\t")
 DifferentialData<-AllData[AllData[,2]!=0,]
 write.table(DifferentialData, file="DifferentialData.txt", 
-     sep="\t",row.names=FALSE, col.names=FALSE, quote=FALSE )
+    sep="\t",row.names=FALSE, col.names=FALSE, quote=FALSE )
 
-runSCANR(testNetwork1.sif,DifferentialData.txt, 
-         NumberOfDeltaToScan=3, topNumGenes=100, 
-         correctPredictionsThreshold=3)
+runSCANR(ccg, ReadExperimentalData("DifferentialData.txt", ccg), 
+        NumberOfDeltaToScan=3, topNumGenes=100, 
+        correctPredictionsThreshold=3)
 @
 
-
+<<eval=FALSE>>=
+#  Generate a .sif file, testOutput.sif, to visualise a network 
+#  of nodes explained by a specific hypothesis in Cytoscape
+WriteExplainedNodesToSifFile("IL1A", +1, ccg, experimentalData,
+                                       delta, file="testOutput")
+@
 
 \newpage
 
 \subsection{Speeding-up CausalR Processing}
 
-The runtimes for \textit{CausalR} increases with the size of network and experimental input. Use of the R (JIT) byte code compiler (part of base R from R2.13 onwards) can offset this by significantly speeding-up processing (although this will not be seen for small examples where the cost of setting-up the JIT outweighs its benefit). \\
+The runtimes for {\tt RankTheHypotheses()} increase with the size of network and experimental input. This can be offset via the use of parallelisation or the R (JIT) byte code compiler (no additional package installations are needed to use these as they are integral to the latest versions of base R). Note that run times will not be improved for very small examples where the cost of setting-up paralleisation or JIT outweighs its benefit. \\
 
-The commands to use prior to running \textit{CausalR} are:
+Parallelisation is recommended for architectures featuring a multicore processor(s), whilst JIT is advised for older single or dual core machines.\\
+
+Running {\tt RankTheHypotheses()} in parallel : \\
+
+Parallel processing can be activated via the {\tt doParallel} flag, 
+
+<<eval=FALSE>>=
+RankTheHypotheses(ccg,experimentalData,delta,doParallel=TRUE)
+@
+
+By default the function will attempt to detect the number of available processer cores and use all of them bar one. \\
+
+Alternatively, the number of cores to use can be set directly via the {\tt numCores} flag,
+
+<<eval=FALSE>>=
+RankTheHypotheses(ccg,experimentalData,delta,
+                                  doParallel=TRUE, numCores=3)
+@
+
+To get the number of processor cores on their system:\\
+
+\textit{Linux} users can use the {\tt lscpu} or {\tt nproc -all} commands.\\
+
+\textit{Windows} users can open open a DOS window and type,\\
+
+{\tt WMIC CPU Get DeviceID,NumberOfCores,NumberOfLogicalProcessors} \\ 
+
+or {\tt WMIC CPU Get /Format:List} can be used. \\
+
+Alternatively, they can look in the 'CPU Usage History' under the Windows Task manager 'Performance' tab. \\
+
+
+Running {\tt RankTheHypotheses()} with JIT compilation : \\
+
+In order to activate the R byte code compiler functionality, R must be started with an additional flag command, R\textunderscore COMPILE\textunderscore PACKAGES=1. This can be done from the \textit{Linux} or \textit{Windows} command line when invoking R. \\
+
+Alternatively, prior to starting R from the desktop icon on a \textit{Windows} machine, place the R\textunderscore COMPILE\textunderscore PACKAGES=1 after the path to Rgui.exe in the \textit{Target} field, under the \textit{Shortcut} tab of the R icon \textit{Properties} (accessed by right mouse click on the R icon). \\
+
+
+Upon starting R, from double clicking the icon, the commands to use prior to loading \textit{CausalR} are:
 
 <<>>=
 library(compiler)
 enableJIT=3
 @
 
-When set to greater than zero, {\tt enableJIT} invokes Just-In-Time (JIT) compilation, whilst $enableJIT=0$ disables it. JIT can also be enabled by starting R with the environment variable ``R\_ENABLE\_JIT" set to 1, 2 or 3, depending upon the level required.\textit{CausalR}works well with the level set to 3. \\
+When set to greater than zero, {\tt enableJIT} invokes Just-In-Time (JIT) compilation, whilst {\tt $enableJIT=0$} disables it. JIT can also be enabled by starting R with the environment variable {\tt R\_ENABLE\_JIT} set to 1, 2 or 3, depending upon the level required. \textit{CausalR} works with the level set to 3. \\
 
 For further details see, \textit{http://www.inside-r.org/r-doc/compiler/compile} \\ 
-or, alternatively, type $??compiler$ at the R command prompt to pull up the relevant R help page.\\
+or, alternatively, type $??compiler::compile$ at the R command prompt to pull up the relevant R help page.\\
 
 \noindent The JIT compiler compiles the package the first time it is run. Therefore, in order to achieve speed-up, the user needs to run a small \textit{CausalR} example prior to running a very large one. JIT can also be used for medium sized inputs where the user wishes to run the computationally-expensive exact p-value calculation algorithm. \\
 
-Note: when running very large networks/input the memory available to R may need reconfiguration (this is explained in the R documentation, but one easy way is to start-up R with the command line flag, -max-mem-size=????M, where ???? is a value in KB such that 4000M = 4MB. Use of 64bit R is also recommended in order to be able to address sufficient memory. 
+Note: when running very large networks/input the memory available to R may need reconfiguration (this is explained in the R documentation, but one easy way is to start-up R with the command line flag, -max-mem-size=????M, where ???? is a value in KB such that 4000M = 4MB (this can also be inserted in the \textit{Windows} icon \textit{Target} field, see above). Use of 64bit R is also recommended in order to be able to address sufficient memory. 
 
 \end{appendices}
 \end{document}

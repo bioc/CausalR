@@ -9,18 +9,18 @@
 #' Causal reasoning on biological networks: Interpreting transcriptional changes.
 #' Bioinformatics, 28(8):1114-21, 2012.
 
-GetSetOfSignificantPredictions <- function(predictions){
-
-counter <- 1
-numPredictions <- nrow(predictions)
-significantPredictions <- matrix(0,numPredictions,1)
-for (i in 1:numPredictions){
-	if ((as.numeric(predictions[i,2]) != 0)){
-		significantPredictions[counter,1] <-  predictions[i, 1]
-		counter <-  counter + 1
-	}
-}
-significantPredictions <- significantPredictions[1:counter-1]
-
-return(significantPredictions)
-}
+GetSetOfSignificantPredictions <- function(predictions) {
+    
+    counter <- 1
+    numPredictions <- nrow(predictions)
+    significantPredictions <- matrix(0, numPredictions, 1)
+    for (i in 1:numPredictions) {
+        if ((as.numeric(predictions[i, 2]) != 0)) {
+            significantPredictions[counter, 1] <- predictions[i, 1]
+            counter <- counter + 1
+        }
+    }
+    significantPredictions <- significantPredictions[1:counter - 1]
+    
+    return(significantPredictions)
+} 

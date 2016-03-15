@@ -9,14 +9,14 @@
 #' @param outputfile the file to which the results should be written
 #' @return Nodes regulated by hypothesis gene
 
- 
-GetRegulatedNodes <-function(PPInet, Expressiondata,delta, hypothesisGene="",signOfHypothesis=1,outputfile=""){
-ccg = CreateCCG(PPInet)
-experimentalData = ReadExperimentalData(Expressiondata, ccg)
-#rankedHypothesis=RankTheHypotheses(ccg, experimentalData, delta)
-ndelta<-delta+1
-predictions <- MakePredictionsFromCCG(hypothesisGene,signOfHypothesis,ccg,ndelta)
-x<-GetNodeName(ccg,CompareHypothesis(predictions,experimentalData))
-write.table(x, file=outputfile, sep="\t", col.names=TRUE, quote=FALSE)
 
-}
+GetRegulatedNodes <- function(PPInet, Expressiondata, delta, hypothesisGene = "", signOfHypothesis = 1, outputfile = "") {
+    ccg = CreateCCG(PPInet)
+    experimentalData = ReadExperimentalData(Expressiondata, ccg)
+    # rankedHypothesis=RankTheHypotheses(ccg, experimentalData, delta)
+    ndelta <- delta + 1
+    predictions <- MakePredictionsFromCCG(hypothesisGene, signOfHypothesis, ccg, ndelta)
+    x <- GetNodeName(ccg, CompareHypothesis(predictions, experimentalData))
+    utils::write.table(x, file = outputfile, sep = "\t", col.names = TRUE, quote = FALSE)
+    
+} 

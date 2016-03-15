@@ -9,16 +9,16 @@
 #' @param subgraphOfConnectedNodes a subgraph 
 #' @return a list of connected nodes in the subgraph
 
-FindIdsOfConnectedNodesInSubgraph <- function(idsOfConnectedNodes, subgraphOfConnectedNodes){
-
-  
-  numConnectedNodes <- length(idsOfConnectedNodes)
-  idsOfConnectedNodesInSubgraph <- array(0,length(idsOfConnectedNodes))
-  ids <- V(subgraphOfConnectedNodes)$ID
-  
-  for (i in 1:numConnectedNodes){
-    idsOfConnectedNodesInSubgraph[i] <- which(ids == idsOfConnectedNodes[i])
-  }
-  
-  return(idsOfConnectedNodesInSubgraph)
-}
+FindIdsOfConnectedNodesInSubgraph <- function(idsOfConnectedNodes, subgraphOfConnectedNodes) {
+    
+    
+    numConnectedNodes <- length(idsOfConnectedNodes)
+    idsOfConnectedNodesInSubgraph <- array(0, length(idsOfConnectedNodes))
+    ids <- igraph::V(subgraphOfConnectedNodes)$ID
+    
+    for (i in 1:numConnectedNodes) {
+        idsOfConnectedNodesInSubgraph[i] <- which(ids == idsOfConnectedNodes[i])
+    }
+    
+    return(idsOfConnectedNodesInSubgraph)
+} 

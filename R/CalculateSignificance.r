@@ -4,6 +4,7 @@
 #' distribution table, using either the quartic or the (faster) cubic algorithm
 
 #' @export
+#' @concept CausalR
 #' @param hypothesisScore score for a particular hypothesis 
 #' @param predictionListStats numbers of predicted up-regulated, 
 #' predicted down-regulated and ambiguous predictions predicted by the algorithm 
@@ -27,18 +28,16 @@
 
 
 
-CalculateSignificance <- function(hypothesisScore, predictionListStats, experimentalResultStats, epsilon=1e-5, useCubicAlgorithm=TRUE, use1bAlgorithm=TRUE){
-  
-  if(useCubicAlgorithm){
-    if (use1bAlgorithm){
-      pValue <- CalculateSignificanceUsingCubicAlgorithm1b(hypothesisScore, predictionListStats, experimentalResultStats, epsilon)
-    }    
-    else{
-      pValue <- CalculateSignificanceUsingCubicAlgorithm(hypothesisScore, predictionListStats, experimentalResultStats, epsilon)
+CalculateSignificance <- function(hypothesisScore, predictionListStats, experimentalResultStats, epsilon = 1e-05, useCubicAlgorithm = TRUE, use1bAlgorithm = TRUE) {
+    
+    if (useCubicAlgorithm) {
+        if (use1bAlgorithm) {
+            pValue <- CalculateSignificanceUsingCubicAlgorithm1b(hypothesisScore, predictionListStats, experimentalResultStats, epsilon)
+        } else {
+            pValue <- CalculateSignificanceUsingCubicAlgorithm(hypothesisScore, predictionListStats, experimentalResultStats, epsilon)
+        }
+    } else {
+        pValue <- CalculateSignificanceUsingQuarticAlgorithm(hypothesisScore, predictionListStats, experimentalResultStats)
     }
-  }
-  else{
-    pValue <- CalculateSignificanceUsingQuarticAlgorithm(hypothesisScore, predictionListStats, experimentalResultStats)
-  }
-  return(pValue)
-}
+    return(pValue)
+} 

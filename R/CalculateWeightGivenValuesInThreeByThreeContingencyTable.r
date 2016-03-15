@@ -8,15 +8,13 @@
 
 #' @return a D-value (or weight)
 
-CalculateWeightGivenValuesInThreeByThreeContingencyTable <- function(threeByThreeContingencyTable, logOfFactorialOfPredictionListStats, returnlog = FALSE){
-
-  # The D value is defined as:
-  # (q+! / (n++! * n+-! * n+0!)) * (q-! / (n-+! * n--! * n-0!)) * (q0! / (n0+! * n0-! * n00!))
-  
-  if (returnlog){
-    return(sum(logOfFactorialOfPredictionListStats) - sum(lfactorial(threeByThreeContingencyTable)))
-  }
-  else{
-    return(exp(sum(logOfFactorialOfPredictionListStats) - sum(lfactorial(threeByThreeContingencyTable))))
-  }
-}
+CalculateWeightGivenValuesInThreeByThreeContingencyTable <- function(threeByThreeContingencyTable, logOfFactorialOfPredictionListStats, returnlog = FALSE) {
+    
+    # The D value is defined as: (q+! / (n++! * n+-! * n+0!)) * (q-! / (n-+! * n--! * n-0!)) * (q0! / (n0+! * n0-! * n00!))
+    
+    if (returnlog) {
+        return(sum(logOfFactorialOfPredictionListStats) - sum(lfactorial(threeByThreeContingencyTable)))
+    } else {
+        return(exp(sum(logOfFactorialOfPredictionListStats) - sum(lfactorial(threeByThreeContingencyTable))))
+    }
+} 

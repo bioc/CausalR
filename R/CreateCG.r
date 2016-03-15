@@ -9,29 +9,30 @@
 #'       the information about the network Load in .sif file
 #' @return a CG network
 #' @export
+#' @concept CausalR
 #' @examples
 #' # get path to example .sif file
-#' network <- system.file(package="CausalR", "extdata", "testNetwork.sif")
+#' network <- system.file(package='CausalR', 'extdata', 'testNetwork.sif')
 #' #create cg
 #' cg = CreateCG(network)
 
-CreateCG <- function(sifFile){
- 
-  tableOfInteractions <- ReadSifFileToTable(sifFile)
-  print(paste("File read complete - read in", nrow(tableOfInteractions), "lines. Now constructing network", sep = " "))
-  
-  # Convert input data into a network
-  network <- CreateNetworkFromTable(tableOfInteractions)
-  print("Network has been created - now adding edge properties")
-  
-  # Add edge information
-  interactionInformation <- GetInteractionInformation(tableOfInteractions)
-  network <- AddWeightsToEdges(network, interactionInformation)
-  print("Added weights to edges")
-  
-  network <- AddIDsToVertices(network) 
-  
-  network$isCCG <- FALSE
-  
-  return(network)
-}
+CreateCG <- function(sifFile) {
+    
+    tableOfInteractions <- ReadSifFileToTable(sifFile)
+    print(paste("File read complete - read in", nrow(tableOfInteractions), "lines. Now constructing network", sep = " "))
+    
+    # Convert input data into a network
+    network <- CreateNetworkFromTable(tableOfInteractions)
+    print("Network has been created - now adding edge properties")
+    
+    # Add edge information
+    interactionInformation <- GetInteractionInformation(tableOfInteractions)
+    network <- AddWeightsToEdges(network, interactionInformation)
+    print("Added weights to edges")
+    
+    network <- AddIDsToVertices(network)
+    
+    network$isCCG <- FALSE
+    
+    return(network)
+} 
