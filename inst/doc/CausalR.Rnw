@@ -1,0 +1,875 @@
+%\VignetteEngine{knitr::knitr}
+%\ !Rnw weave = knitr
+<<style-knitr,eval=TRUE,echo=FALSE,results="asis">>=BiocStyle::latex()
+@
+
+%\vignette>
+%\VignetteIndexEntry{CausalR : an R Package for causal reasoning on networks}
+%\vignettePackage{CausalR}
+%\VignetteDepends{igraph,CausalR}
+%\VignetteKeyword{GraphAndNetwork}
+%\VignetteKeyword{Network}
+%\vignetteEncoding{utf8}
+\let\nofiles\relax 
+
+
+\documentclass[11pt]{article}
+
+%\usepackage[utf8]{inputenc}
+\usepackage{verbatim} 
+\usepackage[toc,page]{appendix}
+\usepackage[backend=bibtex8]{biblatex}
+
+
+\parskip=0.8mm
+\parindent=0pt
+
+
+
+\title{Overview of Causal Reasoning with \textit{CausalR} : \\
+Hypothesis Scoring and P-value Calculation}
+
+\author{CausalR Developers Team}
+
+%\bibliographystyle{alpha}
+
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+%\clearpage
+\newpage
+
+\section{Introduction}
+
+\textit{CausalR} provides for the Bioconductor project functionality to discover the top regulators explaining observed measurements through prior knowledge supplied in the form of a causal network.\textit{CausalR} computes how well predictions from a hypothesis (a network node assigned with a regulatory direction), or a set of such, represent differential outcomes observed in experimental data, such as from microarray or NGS sequencing.
+\vspace{5mm}
+This predictiveness is expressed as a unique score to which a level of significance is computed and assigned for each regulator hypothesis. To acquire the most robust hypotheses for what has been observed experimentally, sets of hypotheses (from all nodes within the input network) can be filtered on their significance and ranked according to descending score, as can be seen below in Table 1.
+
+\begin{table}[h!]
+\hskip-1.0cm\begin{tabular}{ |c|p{1.7cm}|p{0.8cm}|p{1.15cm}|p{1.45cm}|p{1.8cm}|p{1.25cm}|p{1.8cm}|  }
+\hline
+Node &Regulation &Score &Correct &Incorrect &Ambiguous &p-value &Enrichment p-value \\
+[0.3ex]
+\hline
+Node0 &1 &4 &5 &1 &1 &0.114 &1 \\
+\hline
+Node1 &1 &3 &3 &0 &0 &0.121 &1 \\
+\hline
+Node3 &1 &1 &1 &0 &0 &0.500 &0.875 \\
+\hline
+Node5 &-1 &1 &1 &0 &0 &0.375 &0.875 \\
+\hline
+Node6 &-1 &1 &1 &0 &0 &0.375 &0.875 \\
+\hline
+Node7 &-1 &1 &1 &0 &0 &0.375 &0.875 \\
+\hline
+Node2 &1 &0 &2 &2 &0 &0.629 &0.5 \\
+\hline
+Node4 &1 &0 &0 &0 &0 &0.625 &1 \\
+\hline
+Node2 &-1 &0 &2 &2 &0 &0.543 &0.5 \\
+\hline
+Node4 &-1 &0 &0 &0 &0 &0.500 &1 \\
+\hline
+Node5 &1 &-1 &0 &1 &0 &1 &0.875 \\
+\hline
+Node6 & 1 &-1 &0 &1 &0 &1 &0.875 \\
+\hline
+Node7 &1 &-1 &0 &1 &0 &1 &0.875 \\
+\hline
+Node3 &-1 &-1 &0 &1 &0 &1 &0.875 \\
+\hline
+Node1 &-1 &-3 &0 &3 &0 &0.957 &1 \\
+\hline
+Node0 &-1 &-4 &1 &5 &1 &0.971 &1 \\ [1ex]
+\hline
+\end{tabular}
+\caption{\textit{CausalR} {\tt delta=2} output for example inputs.}
+\label{tab:t1}
+\end{table}
+
+The \textit{SCAN} methodology is also provided as an alternative approach that relies more upon known properties of pathway regulators for the acquisition of robust hypotheses. For further background on methodological details, suggested analysis approaches and actual biological causal networks with matching signal data, see Bradley etal. \cite{tobeSubmitted}. Table 1 represents the actual ranked hypotheses output produced by executing the following sequence of functions {\tt CreateCCG()}, {\tt ReadExperimentalData()} then {\tt RankTheHypotheses()} provided with the same network and experimental data used in the following text. For convenience, the complete set of commands, with details of  further functionality, are listed in Appendix A in the form of an R script.
+
+\vspace{5mm}
+The following tutorial text provides a step-by-step series of examples on using \textit{CausalR}, together with further descriptive explanation of what is happening at each stage.
+
+
+\section{Loading Input Network and Experimental Data}
+
+After starting the R environment (either the standard R console or via an IDE such as \textit{Rstudio, http://www.rstudio.com}), and setting the working directory to an appropriate location for accessing input files, proceed to loading the \textit{CausalR} library, 
+
+<<>>=
+library(CausalR)
+@
+
+The loading of the main package also performs 
+
+<<>>=
+library(igraph)
+@
+
+since \textit{igraph} contains network analysis functionality required by CausalR.
+%Then load the required \textit{igraph} package, which contains network analysis tools used by CausalR,
+
+
+\vspace{5mm}
+%Set the working directory to the location of inputs.
+
+%setwd("E:/CR/GlynsFinal/CausalR/inst/extdata")
+
+These triples represent the network to be used in the example processing,
+
+%\vspace{5mm}
+
+\begin{verbatim}
+Node0 Activates Node1
+Node0    Inhibits    Node2
+Node1    Activates    Node3
+Node1    Activates    Node4
+Node1    Inhibits    Node5
+Node2    Inhibits    Node5
+Node2    Activates    Node6
+Node2    Activates    Node7
+\end{verbatim}
+
+%\vspace{5mm}
+
+Each line triple represents a directed edge in the input network of Figure 1,
+
+\begin{figure}[ht]
+    \includegraphics{Fig1.png}
+    \caption{ Example input network. }
+    \label{fig:f1}
+\end{figure}
+
+This is read from tab-separated (Cytoscape {\tt .sif} format) file by one of two user functions, {\tt CreateCG()} or {\tt CreateCCG()} which respectively create and store either a  causal or a computational causal graph. To understand what these are we first show how the function {\tt CreateCG()} is used to create an internal representation of the network as a Causal Graph (CG).
+
+<<>>=
+cg <- CreateCG(system.file( "extdata", "testNetwork1.sif", 
+    package="CausalR"))
+@
+
+The CG is stored in the workspace as an \textit{igraph} object,  which is a particular type of object that can be used to store and process graphs in R (see \textit{http://igraph.org/r/doc/igraph.pdf} ). The Causal Graph can then be visualised via,
+ 
+<<>>=
+PlotGraphWithNodeNames(cg)  # producing the following graph.
+@
+
+Note that although only directional connectivity is shown, edge sign attribution of the input network is retained. Note also that \textit{igraph} will assign internal numeric nodeIDs (for simplicity, the example network here mirrors these) that are used internally by \textit{CausalR} functions. Most \textit{CausalR} functions will automatically convert \textit{igraph} nodeIDs back to node names recognisable to the user, but there are exceptions that return output with these numbers. For those outputs, the user will need to apply the {\tt GetNodeName()}.
+
+\vspace{5mm}
+
+The {\tt CreateCCG()} function creates in the workspace an \textit{igraph} object called "ccg" which contains a computational causal network representation of the contents of the input network.sif file.
+
+<<>>=
+ccg <- CreateCCG(system.file( "extdata", "testNetwork1.sif", 
+    package="CausalR"))
+@
+
+The latter is employed internally instead of a CG for processing efficiency. 
+
+\vspace{5mm}
+
+A CCG contains duplicated vertices to separately represent up and down regulation of each node, and these are connected according to the original edge relations from the network.sif file. The Computational Causal Graph (CCG) for the input network input can be visualised via,
+
+
+<<>>=
+PlotGraphWithNodeNames(ccg) # producing the following graph.
+@
+
+The input differential experimental results (used in subsequent worked examples) is as follows,
+
+\begin{verbatim}
+Node0    1
+Node1    1
+Node2    1
+Node3    1
+Node4    0
+Node5    -1
+Node6    -1
+Node7    -1
+\end{verbatim}
+
+In the second column, 1 represents differential activation, -1 differential inhibition and 0 indicates no differential regulation was observed for the entity represented by the node. 
+
+\vspace{5mm}
+
+The inclusion of all non-differential results is critical to accurate significance calculations (in their absence \textit{CausalR} will otherwise see them as not measured and process them accordingly). 
+
+\vspace{5mm}
+
+A tab-separated file containing this content is read into the workspace using {\tt ReadExperimentalData()}, as follows,
+
+
+<<>>=
+experimentalData <- ReadExperimentalData(system.file( "extdata", 
+                        "testData1.txt", package="CausalR"),ccg)
+@
+
+At this stage checks are performed to identify entities (nodes) not present within the CG/CCG.
+
+\vspace{5mm}
+
+These are flagged to the user and excluded from the two column experimental data matrix [\textit{igraph} nodeID, regulation] that is stored in the workspace for subsequent processing.
+
+\newpage
+
+\section{Computing Score: Multiple Causal Hypotheses}
+
+
+To compute a list of score-ranked hypotheses (as in Table 1) within an interactive session, the user would employ the {\tt RankTheHypotheses()} function (see Appendix B instructions for running in parallel) as follows, 
+
+{\scriptsize
+<<>>=
+options(width=120)
+RankTheHypotheses(ccg, experimentalData, delta=2) 
+@
+}
+
+Alternatively, the following is used to output similar (results for both + and - hypotheses will again be generated) for a subset of nodes,
+
+{\scriptsize
+<<>>=
+options(width=120)
+testlist<-c('Node0','Node2','Node3')
+RankTheHypotheses(ccg, experimentalData, 
+                                delta=2, listOfNodes=testlist)
+@
+}
+
+{\tt RankTheHypotheses()} takes as arguments the workspace CCG and experimental matrix object (both from the processing described above), together with a user supplied numeric value for the path length, termed delta, $delta$. The latter represents the desired number of edges in the network the user wishes the algorithm to look forward, from the hypothesis, to observed result nodes.
+
+\vspace{5mm}
+
+With each further level searched into the network, the number of connected nodes increases roughly exponentially until the $delta$ approximates the network average degree. With deltas close to or above the network average degree the majority of hypothesis nodes will be connected to most other nodes in the network, and consequently the ability of the scoring algorithm to differentiate good hypotheses from bad ones will be degraded.
+
+\vspace{5mm}
+
+{\tt RankTheHypotheses()} calls the hidden function {\tt Scorehypothesis()}, which computes  scores reflecting the overall level of agreement between predictions based upon an individual hypothesis and the experimentally observed results for nodes within $delta$ edges (i.e. to which it can be causally-linked).
+
+
+\section{Computing Score: Specific Causal Hypothesis}
+
+To get scores and significance summary for both up- and down-regulation hypotheses concerning an individual node, the {\tt listOfNodes} input can be assigned to a sole node name (note that node names are case sensitive in \textit{CausalR}),
+
+{\scriptsize
+<<>>=
+options(width=120)
+RankTheHypotheses(ccg, experimentalData, 2, listOfNodes='Node0')
+@
+}
+
+It may first be useful to check on node content and length of the shortest path from the proposed hypothesis (root) node to any specific (outcome) target node(s) of interest. For this the function {\tt GetShortestPathsFromCCG()} is employed,
+
+<<results='hide'>>=
+GetShortestPathsFromCCG(ccg, 'Node0', 'Node3')
+@
+
+{\tt node0+ node1+ node3+}
+\vspace{3mm}
+
+An alternative to {\tt RankTheHypotheses()} enables acquisition of further detail on the breakdown of scoring contributions. The {\tt MakePredictionsFromCCG()} function can be used directly to get scores for a particular signed hypothesis of a node, 
+
+<<>>=
+predictions <- MakePredictionsFromCCG('Node0',+1,ccg,2)
+predictions
+@
+
+The input {\tt node0} is the root (or hypothesis) node, +1 is the direction of regulation, ccg is the network, and the last value, 2, is the {\tt delta} value (these inputs are explained in more detail in the following section).  The predictions will be returned as above, with the \textit{igraph} assigned node ID in the first column and the direction of regulation in the second.
+
+\vspace{5mm}
+
+The {\tt ScoreHypothesis()} function can then be used to provide a summary of the comparisons between the predictions from the given hypothesis against the observed outcomes in the experimental data,
+
+<<>>=
+ScoreHypothesis(predictions, experimentalData)
+@
+
+This returns 4 integer values, which (in order) are the score (the number of correct predictions minus the number of incorrect predictions), number of correct predictions, number of incorrect predictions and number of ambiguous predictions (these will be explained later within the Scoring Section).
+
+\vspace{5mm}
+
+To discover how each predicted node outcome contributes to the score, the {\tt CompareHypothesis()} function is used to provide a comparison between experiment and prediction for each node separately,
+
+
+<<>>=
+GetNodeName(ccg,CompareHypothesis(predictions, experimentalData))
+@
+
+The use of function {\tt GetNodeName()} is required here to convert \textit{igraph} nodeIDs, output by {\tt CompareHypothesis()}, back to user recognisable node names, as was supplied in the inputs.
+
+\vspace{5mm}
+
+Functions {\tt CalculateSignificance()} and {\tt CalculateEnrichmentPValue()} can be used to calculate the statistical significance of a given signed hypothesis, as detailed in the R code of Appendix A.
+
+\subsection{Hypothesis-specific CCGs}
+
+During scoring, hypothesis-specific CCGs are sequentially created and scored. Each hypothesis will be represented as the unique root node of its corresponding CCG, whilst the maximum depth for any hypothesisCCG is equal to the path length, {\tt delta}.
+
+\vspace{5mm}
+
+Since each hypothesis observes a either upward or downward regulation, the number of individual hypothesisCCGs computed and scored will be equal to twice the number of nodes in the input network, if all possible hypotheses are tested, as this is the default behaviour for function {\tt RankTheHypotheses()}.  
+
+\vspace{5mm}
+
+Prior to the construction of each hypothesisCCG, nodes beyond {\tt delta} edges from the hypothesis are removed from the processed network and untested nodes (those without experimental results, apart from the hypothesis node itself) are also excluded. To construct the final hypothesisCCG, regulatory relations are then applied between the hypothesis along all paths toward the remaining nodes, observing the original network edge values.
+
+\section{Scoring}
+
+To aid scoring the CCG object represents a partitioning of the set of nodes in the experimental data, represented by $T|G|$,  into three sets: the positively regulated, negatively regulated and those that are unaffected. These sets are denoted as $S_h+ , S_h-$ and $S_h0$ respectively, as defined in \cite{2012a}. 
+
+\vspace{5mm}
+
+Thus in the terminology of the Methods: Scoring hypotheses section of \cite{2012a}, the observed experimental input (as above) would be represented as :
+
+\begin{eqnarray*}
+G_+ & = & \left\{ 
+\mbox{Node0},
+\mbox{Node1},
+\mbox{Node2},
+\mbox{Node3}
+\right\} \\
+G_- & = & \left\{ 
+\mbox{Node5},
+\mbox{Node6},
+\mbox{Node7}
+\right\} \\
+G_0 & = & \left\{ 
+\mbox{Node4}
+\right\}
+\end{eqnarray*}
+
+Any node greater than {\tt delta} edges from the hypothesis node is automatically added to $S_h0$, since the path length to the hypothesis is deemed too distant to include in scoring, according to user parameterisation. 
+
+\begin{figure}[ht]
+\includegraphics{Fig2.png}
+\caption{ Network consequences of {\tt Node0+} }
+\label{fig:f2}
+\end{figure}
+
+\subsection{Example Causal hypothesis to be Scored}
+
+In the following example calculations, the causal hypothesis to be scored is up-regulation of Node0, denoted as  {\tt Node0+}. Figure 2 above shows the downstream consequences of up-regulating Node0, as derived by traversing its hypothesisCCG, observing how the original network edge values translate the regulatory sign of the (root) hypothesis along the paths to predicted outcomes. Note that Node 5 is both positively and negatively regulated by {\tt Node0+}.
+
+\subsection{Network Predictions based upon Hypothesis {\tt Node0+}}
+
+The predictions $|TG_c|$ from the network (represented as per \cite{2012a}, Methods: Scoring hypotheses) would be:
+
+\begin{eqnarray*}
+S_h+ & = & \left\{ 
+\mbox{Node0},
+\mbox{Node1},
+\mbox{Node3},
+\mbox{Node4}
+\right\} \\
+S_h- & = & \left\{ 
+\mbox{Node2},
+\mbox{Node6},
+\mbox{Node7}
+\right\} \\
+S_h0 & = & \left\{ 
+\mbox{Node5}
+\right\}
+\end{eqnarray*}
+
+
+\subsection{Scoring Calculation}
+
+[Example for {\tt delta=2}] Comparing $T|G|$ to $T|G_c|$ yields the correct predictions from this hypothesis as: Node 0, Node 1, Node 3, Node 6 and Node 7. The only incorrect prediction from this hypothesis is:  Node 2. 
+
+\vspace{5mm}
+
+The \textit{CausalR} scoring algorithm traces the shortest path from hypothesis to outcome node and then evaluates its sign to achieve a predicted regulation for that outcome node. The hypothesis here yields a so called "ambiguous" prediction-outcome match for Node 5, since there are two shortest paths to it and their predictions disagree, hence it doesn't contribute to the scoring.
+
+\vspace{5mm}
+
+Node 4 is also excluded from the score calculation because the observed experimental outcome for it was non-differentially regulated (unchanged) and this is a result that cannot be predicted by CausalR, as only an up or down regulation can be inferred from a signed graph.
+
+\vspace{5mm}
+
+Subtracting number of incorrect predictions (1) from the number that was correct (5) yields a score of 4 for hypothesis {\tt Node0+}.
+
+
+\section{Hypothesis Score Significance Calculation}
+
+To account for the scenario where the more heavily connected hypothesis nodes have greater potential to score more highly than less connected ones, the significance of each hypothesis score needs to be individually calculated.
+
+\vspace{5mm}
+
+A lower significance (higher p-value) cut-off can then be applied as a filter to the overall scores ranking, as decided via the biological expertise of the user.
+
+\vspace{5mm}
+
+\textit{CausalR} provides both p-values and enrichment p-values for this purpose. There are two alternatives for p-value calculation: a computationally expensive exact "quartic" algorithm (see section 2.4 in \cite{2012a}) and (for larger inputs) a very much more efficient (minutes instead of hours)  approximate "cubic" algorithm (see pages 6-7 in \cite{2012b}). 
+
+\subsection{Calculation of p-value}
+
+[Continuation of previous example for {\tt delta=2}] Within the context of network causal reasoning (see section 2.4, \cite{2012a}), we are looking for the probability of obtaining a hypothesis (node) score at least as extreme as that which was observed, assuming the null hypothesis, that the hypothesis node was not responsible for producing the experimental outcomes, is true (i.e.\ result is not significantly different from random).  
+
+\vspace{5 mm}
+
+To calculate the p-value significance of this score for hypothesis {\tt Node0+}, these predictions must be scored against all possible predictions with $|G+| = 4$, and $|G-| = 3$.
+
+\vspace{5 mm}
+
+Given that there are 8 nodes to pick each combination from, the total number of combinations is:  ${}^8C_4 \times {}^4C_3 = 280$
+
+\vspace{5 mm}
+
+There is only one way to get the highest possible score of 7.
+
+\vspace{5 mm}
+
+There are two approaches to achieve a score of 6. The first is to choose all 4 nodes in $ G+$ from the nodes in $ S_h+$, and two of the nodes in $ G-$ from $ S_h-$: there are ${}^4C_4$ x ${}^3C_2 = 3$ ways of doing this. The other possibility is to choose 3 nodes in $ S_h+$ and 1 in $ S_h0$ as the nodes in $ G+$. Then choose all three of the nodes in $ G-$ from $ S_h-$ there are ${}^4C_3$ x ${}^3C_3 = 4$ ways of doing this. Hence there are 7 ways of scoring 6 in total.
+
+\vspace{5 mm}
+
+A score of 5 cannot be achieved.
+
+\vspace{5 mm}
+
+There are two ways to score 4. 
+(The first is to choose 3 nodes from $S_h+$ and 1 from $S_h-$ as the nodes in $ G+$, then choose 2 nodes from $S_h-$ and the 1 in $S_h0$ as the nodes in $G-$. There are ${}^4C_3$ x ${}^3C_1 = 12$ ways of doing this. The second way is to choose 3 nodes from $ S_h+$ and the 1 from $ S_h0$ as the nodes in $ G+$, then choose 2 nodes from $ S_h-$ and 1 in $ S_h+$ as the nodes in $ G-$. There are ${}^4C_3$ x ${}^3C_2 = 12$ ways of doing this. This means in total there are 24 ways of scoring 4.
+
+\vspace{5 mm}
+
+We now have all the information we need to calculate the p-value of the hypothesis above. There are $24+7+1 = 32$ ways to score 4 or higher, hence the p-value should be $32/280 = 0.114$, as can be seen for the up-regulated node 0 hypothesis in Table 1. 
+
+\subsection{Calculation of Enrichment p-value}
+
+Enrichment $p-$values, $p_E$, are calculated using standard approaches used for gene ontology enrichment (see \cite{GOEAST})
+
+\vspace{5 mm}
+
+Where $n_{++} + n_{+-} + n_{-+} + n_{--} = m$ ( i.e. the number of differentially expressed genes, $m$ in Table 2), and $T = T|G|$ is the total number of experimental transcripts; then $p_E$ is the probability of getting m or more differential  nodes from a set of $T$ nodes given the fraction of nodes predicted to be differential.
+
+\vspace{5 mm}
+
+This computation is done using the Fisher exact test (see \cite{Fisher}), as implemented in the fisher.test function in base R. 
+
+\vspace{5mm}
+
+The goal is to compare the actual number of differential nodes to the number of predicted ones, given the values of $q_+, q_- , q_0 , n_+, n_-, n_0, n_{++}, n_{+-}, n_{-+}$ and $n_{--}$ in Table 2 below.
+
+\vspace{10 mm}
+
+\begin{table}[h!]
+\begin{tabular}{ |p{2.8cm}|p{5cm}|p{2cm}|p{1.5cm}|}
+\hline
+\textit{Predicted} \newline Causal Network &\textit{Measured} \newline Differential &\textit{Measured} Non-differential &\textit{Measured} Total\\
+\hline
+Differentially Expressed &$n_{++} + n_{+-}  + n_{-+} + n_{--}$ $ = m$ & $ n_{+_0} + n_{-0}$ & $ q_+ + q_-$ \\
+\hline
+Non-differentially Expressed &$ n_{0+} + n_{0-} = n_+ + n_- - m$ & $ n_{00}$ & $ q_0$ \\
+\hline
+Total & $n_+ + n_-$ &$ n_0$ &$ T|G|$ \\
+\hline
+\end{tabular}
+\caption{ Result outcome categorisations used in significance calculations.}
+\label{tab:t2}
+\end{table}
+
+
+\vspace{10 mm}
+
+
+The probability of getting this arrangement of values is given by the hypergeometric distribution,
+
+\begin{displaymath}
+p=\frac{{q_+ + q_- \choose m}{q_0 \choose n_{0+}+n_{0-}}}{{|T(G)| \choose n_++n_-}}
+\end{displaymath}
+
+To obtain $p_E$, the probability of getting m or more elements in the intersection between the sets of predicted versus experimentally-observed differential nodes, needs to be calculated. The formula employed to calculate the enrichment p-value is therefore,
+
+\begin{displaymath}
+p_E= \sum^{q_+ + q_-}_{i=m} \frac{{q_+ + q_- \choose i}{q_0 \choose n_{+}+n_{-}-i}}{{|T(G)| \choose n_++n_-}}
+\end{displaymath}
+
+\vspace{5mm}
+
+\subsection{Efficiency and Accuracy of Significance Calculation}
+
+As stated earlier, it is crucial to include non-differential outcomes in the experimental input for accurate significance calculations. The problem with this is that for large NGS study data compute times increase greatly and much of the added effort will be on significance calculations for poor hypotheses. 
+
+\vspace{5mm}
+
+This can be avoided by resetting the {\tt correctPredictionsThreshold} value used by the {\tt RankTheHypotheses()} function.  This is normally set to minus infinity, which means that $p$ and $p_E$ values will be calculated regardless of hypothesis score. When reset to a positive value it restricts significance calculations to a subset of hypotheses with a minimum number of correct predictions (all other hypotheses will automatically get {\tt NA} values).
+
+
+{\scriptsize
+<<>>=
+options(width=120)
+Rankfor4<-RankTheHypotheses(ccg, experimentalData, 2, 
+                            correctPredictionsThreshold=4)
+Rankfor4   # For example output only
+subset(Rankfor4,Correct>=4)
+@
+}
+
+This can also be useful where the user wishes to employ the more computationally expensive exact (cubic) algorithm on a subset of interesting hypotheses, instead of using the (default) approximation algorithm.
+
+\newpage
+
+\section{Sequential Causal Analysis of Networks (SCAN)}
+
+Given that true causal regulators are likely to regulate nodes at various distances along the pathways in which they feature, the use of a range of different deltas can be employed to improve enrichment for them. This was the thinking behind Sequential Causal Analysis of Networks ($SCAN$) approach introduced in Bradley \textit{et al.}\cite{tobeSubmitted}.
+
+\vspace{5 mm}
+
+By invoking the {\tt runSCANR()} function \textit{CausalR} is iteratively run for a range of path lengths ({\tt deltas}), starting  from {\tt delta=1} up to the value of the user-supplied variable {\tt NumberOfDeltaToScan} (default is 5), to discover nodes that consistently score in the highest  {\tt topNumGenes} (default is 150) across all SCAN deltas run.
+
+\vspace{8 mm}
+
+So for example given the following experimental data,
+
+\begin{verbatim}
+NodeA    1
+NodeB    -1
+NodeC    1
+NodeD    -1
+NodeE    1
+NodeF    -1
+NodeG    1
+NodeH    -1
+NodeI    1
+NodeJ    -1
+\end{verbatim}
+
+\vspace{5 mm}
+
+and a more complex network, as in the {\tt Cytoscape} (\textit{http:www.cytoscape.org}) depiction of {\tt testnet.sif} in Figure 3 below).
+
+\begin{figure}[ht]
+    \includegraphics[width=120mm,scale=1.0]{Fig3.png}
+    \caption{ Network input for SCAN Example. }
+    \label{fig:f3}
+\end{figure}
+
+\vspace{5mm}
+
+The {\tt runSCANR()} function will first write the number of nodes to analyse to the R console window (this will be repeated for each delta run). Then the next {\tt NumberOfDeltaToScan} lines output will list the top hypotheses from each delta that was run, whilst the final line gives the ScanR results for the top hypotheses in common between these deltas. 
+
+\vspace{5mm}
+
+<<>>=
+runSCANR(ccg, experimentalData, NumberOfDeltaToScan=2, topNumGenes=4,
+         correctPredictionsThreshold=1)
+@
+
+Line [1] is the top scoring 4 hypotheses from delta 1 \\
+Line [2] is the top scoring 4 hypotheses from delta 2 \\
+Line [3] is the SCANR results, i.e. the hypotheses in common between the sets of top ranked ones coming from each delta.
+
+\vspace{5mm}
+
+From experiments with \textit{CausalR} on signals for known pathways (see Bradley \textit{et al.}\cite{tobeSubmitted}), setting of the {\tt topNumGenes} parameter to represent 1 percent of the number of nodes present in the input network provides a reliable starting heuristic for identifying the true regulators.
+
+\vspace{5mm}
+
+Typically a full SCAN execution can take overnight with large inputs and larger deltas. However, various steps can be taken to improve run times:
+
+\begin{enumerate}
+    \item Use of the R compiler (see Appendix B)
+    \item Excluding scoring of hypotheses for non-differential nodes,
+
+
+<<eval=FALSE>>=
+AllData<-read.table(file="testData1.txt", sep = "\t")
+DifferentialData<-AllData[AllData[,2]!=0,]
+write.table(DifferentialData, file="DifferentialData.txt", 
+    sep="\t", row.names=FALSE, col.names=FALSE, quote=FALSE)
+
+runSCANR(ccg, ReadExperimentalData("DifferentialData.txt", ccg), 
+        NumberOfDeltaToScan=2,topNumGenes=100,
+        correctPredictionsThreshold=2)
+@
+
+\item Suppression of significance calculations. Note that these will be inaccurate and unused anyway if non-differential results are excluded, as with \textit{SCAN} we are relying more upon biological logic rather statistics. This can be achieved via the correctPredictionsThreshold parameter, which has a  default of 4 that can be overridden  to  higher value (scores will still be computed for all hypotheses).
+\end{enumerate}
+
+Accurate p-values and pE-values can later be computed separately for the subset of interesting hypotheses coming from \textit{SCAN}  using,
+
+<<results='hide'>>=
+testlist<-c('Node0','Node3','Node2')
+RankTheHypotheses(ccg, experimentalData,2,listOfNodes=testlist)
+@
+
+which gives up- and down-regulated hypothesis results for each named input node in the testlist.
+
+\vspace{5 mm}
+
+Alternatively, for an individual signed node hypothesis, the user can start from {\tt MakePredictionsFromCCG() } as described earlier under  section "Calculating Score for a Specific Causal Hypothesis".
+
+\newpage
+
+\section{Visualising the Network of Nodes explained by a Specific Hypothesis}
+
+The function {\tt WriteExplainedNodesToSifFile()} allows production of a network of explained nodes, for a particular hypothesis, in .sif file format for visualising in Cytoscape. The function is called as follows: \\ 
+
+<<eval=FALSE>>=
+WriteExplainedNodesToSifFile("IL1A", +1, ccg, experimentalData, 
+                                       delta, file="testOutput")
+@
+
+This will produce a .sif file {\tt testOutput.sif} representing all of the explained nodes (i.e. nodes that have the same direction of regulation in both the network and the experimental data under the hypothesis of up-regulated IL1A), with content structured as follows: 
+
+%\vspace{5mm}
+
+\begin{verbatim}
+IL1A  Activates  ATF3
+IL1A  Activates  BDKRB1
+IL1A  Activates  BIRC2
+IL1A  Activates  CEBPD
+IL1A  Inhibits   CAMLG
+IL1A  Inhibits   TIMP4
+\end{verbatim}
+
+%\vspace{5mm}
+
+A corresponding annotation file {\tt testOutput\_anno.txt} is also created. This file contains the explained node regulation values, 
+
+%\vspace{5mm}
+
+\begin{verbatim}
+NodeID  Regulation
+ATF3       1
+BDKRB1     1
+BIRC2      1
+CEBPD      1
+IL1A       1
+CAMLG      -1
+TIMP4      -1
+\end{verbatim}
+
+%\vspace{5mm}
+
+These files can be loaded into Cytoscape to visualise the explained nodes.
+
+
+\newpage
+
+\begin{thebibliography}{9}
+
+\bibitem{tobeSubmitted} Bradley, G. \textit{et al. (to be submitted)}
+\textit{CausalR}: extracting mechanistic sense from high throughput data. 
+
+\bibitem{2012a} Chindelevitch, L. \textit{et al.} (2012a)
+Causal reasoning on biological networks: interpreting transcriptional changes. Bioinformatics, 28(8):1114-21.
+
+\bibitem{2012b} Chindelevitch, L. \textit{et al.} (2012b)
+Assessing statistical significance in causal graphs (Methodology article). BMC Bioinformatics, 13:35- 48.
+
+\bibitem{Fisher} Fischer, R. A. (1970)
+Statistical Methods for Research Workers. Oliver \& Boyd.
+
+\bibitem{GOEAST} Zheng, Q. and Wang, X-J. (2008)
+GOEAST: a web-based software toolkit for Gene Ontology enrichment analysis. Nucleic Acids Research, 36, W358--W363. 
+
+\end{thebibliography}
+
+
+\newpage
+\begin{appendices}
+%\appendix
+%\section*{Appendices}
+%\addcontentsline{toc}{section}{Appendices}
+\renewcommand{\thesubsection}{\Alph{subsection}}
+
+\subsection{Command Sequence Listing for Examples}
+ 
+<<eval=FALSE>>=
+# Set-up
+library(CausalR)
+library(igraph)
+
+# Load network, create CG and plot
+cg <- CreateCG('testNetwork1.sif')
+
+PlotGraphWithNodeNames(cg)
+@
+
+<<results='hide'>>=
+# Load network, create CCG and plot
+ccg <- CreateCCG(system.file( "extdata", "testNetwork1.sif", 
+    package="CausalR"))
+@
+<<eval=FALSE>>=
+PlotGraphWithNodeNames(ccg)
+@
+
+<<results='hide'>>=
+# Load experimental data
+experimentalData <- ReadExperimentalData(system.file( "extdata",
+                        "testData1.txt", package="CausalR"),ccg)
+@
+
+<<results='hide'>>=
+# Make predictions for all hypotheses, with pathlength set to 2.
+RankTheHypotheses(ccg, experimentalData, 2)
+@
+
+
+<<eval=FALSE>>=
+# Make predictions for all hypotheses, running in parallel
+# NOTE: this requires further set-up as detailed in Appendix B.
+RankTheHypotheses(ccg,experimentalData,delta,doParallel=TRUE)
+@
+
+<<results='hide'>>=
+# Make predictions for a single node (results for + and - 
+# hypotheses for the node will be generated),
+RankTheHypotheses(ccg, experimentalData,2,listOfNodes='Node0')
+@
+
+<<results='hide'>>=
+# Make predictions for an arbitrary list of nodes (gives results
+# for up- and down-regulated hypotheses for each named node),
+testlist <- c('Node0','Node3','Node2')
+RankTheHypotheses(ccg, experimentalData,2,listOfNodes=testlist)
+@
+
+<<results='hide'>>=
+# An example of making predictions for a particular signed hypo-
+# -thesis at delta=2, for up-regulated node0, i.e.node0+.
+# (shown to help understanding of hidden functionality)
+predictions<-MakePredictionsFromCCG('Node0',+1,ccg,2)
+GetNodeName(ccg,CompareHypothesis(predictions,experimentalData))
+@
+
+<<results='hide'>>=
+# Scoring the hypothesis predictions
+ScoreHypothesis(predictions,experimentalData)
+@
+
+<<eval=FALSE>>=
+# Compute statistics required for Calculating Significance 
+# p-value
+Score<-ScoreHypothesis(predictions,experimentalData)
+CalculateSignificance(Score, predictions, experimentalData)
+PreexperimentalDataStats <-
+    GetNumberOfPositiveAndNegativeEntries(experimentalData)
+
+    #this gives integer values for n_+ and n_- for the 
+    #experimental data,as shown in Table 2.
+
+    PreexperimentalDataStats
+
+    # add required value for n_0, number of non-differential
+    # experimental results,
+    experimentalDataStats<-c(PreexperimentalDataStats,1)
+    # then use,
+    AnalysePredictionsList(predictions,8)
+    # ...to output integer values q_+, q_- and q_0 for
+    #    significance calculations (see Table 2)
+    # then store this in the workspace for later use,
+    predictionListStats<-AnalysePredictionsList(predictions,8)
+@
+
+<<eval=FALSE>>=
+# Compute Significance p-value using default cubic algorithm
+CalculateSignificance(Score,predictionListStats, 
+    experimentalDataStats, useCubicAlgorithm=TRUE)
+# or simply,
+CalculateSignificance(Score,predictionListStats, 
+    experimentalDataStats)
+# as use cubic algorithm is the default setting.
+@
+
+<<eval=FALSE>>=
+# Compute Significance p-value using default quartic algorithm
+CalculateSignificance(Score,predictionListStats, 
+                experimentalDataStats,useCubicAlgorithm=FALSE)
+@
+
+<<eval=FALSE>>=
+# Compute enrichment p-value
+CalculateEnrichmentPvalue(predictions, experimentalData)
+@
+
+<<eval=FALSE>>=
+# Running SCAN whilst excluding scoring of hypotheses for non-
+# -differential nodes
+AllData<-read.table(file="testData1.txt", sep="\t")
+DifferentialData<-AllData[AllData[,2]!=0,]
+write.table(DifferentialData, file="DifferentialData.txt", 
+    sep="\t",row.names=FALSE, col.names=FALSE, quote=FALSE )
+
+runSCANR(ccg, ReadExperimentalData("DifferentialData.txt", ccg), 
+        NumberOfDeltaToScan=3, topNumGenes=100, 
+        correctPredictionsThreshold=3)
+@
+
+<<eval=FALSE>>=
+#  Generate a .sif file, testOutput.sif, to visualise a network 
+#  of nodes explained by a specific hypothesis in Cytoscape
+WriteExplainedNodesToSifFile("IL1A", +1, ccg, experimentalData,
+                                       delta, file="testOutput")
+@
+
+\newpage
+
+\subsection{Speeding-up CausalR Processing}
+
+The runtimes for {\tt RankTheHypotheses()} increase with the size of network and experimental input. This can be offset via the use of parallelisation or the R (JIT) byte code compiler (no additional package installations are needed to use these as they are integral to the latest versions of base R). Note that run times will not be improved for very small examples where the cost of setting-up paralleisation or JIT outweighs its benefit. \\
+
+Parallelisation is recommended for architectures featuring a multicore processor(s), whilst JIT is advised for older single or dual core machines.\\
+
+Running {\tt RankTheHypotheses()} in parallel : \\
+
+Parallel processing can be activated via the {\tt doParallel} flag, 
+
+<<eval=FALSE>>=
+RankTheHypotheses(ccg,experimentalData,delta,doParallel=TRUE)
+@
+
+By default the function will attempt to detect the number of available processer cores and use all of them bar one. \\
+
+Alternatively, the number of cores to use can be set directly via the {\tt numCores} flag,
+
+<<eval=FALSE>>=
+RankTheHypotheses(ccg,experimentalData,delta,
+                                  doParallel=TRUE, numCores=3)
+@
+
+To get the number of processor cores on their system:\\
+
+\textit{Linux} users can use the {\tt lscpu} or {\tt nproc -all} commands.\\
+
+\textit{Windows} users can open open a DOS window and type,\\
+
+{\tt WMIC CPU Get DeviceID,NumberOfCores,NumberOfLogicalProcessors} \\ 
+
+or {\tt WMIC CPU Get /Format:List} can be used. \\
+
+Alternatively, they can look in the 'CPU Usage History' under the Windows Task manager 'Performance' tab. \\
+
+
+Running {\tt RankTheHypotheses()} with JIT compilation : \\
+
+In order to activate the R byte code compiler functionality, R must be started with an additional flag command, R\textunderscore COMPILE\textunderscore PACKAGES=1. This can be done from the \textit{Linux} or \textit{Windows} command line when invoking R. \\
+
+Alternatively, prior to starting R from the desktop icon on a \textit{Windows} machine, place the R\textunderscore COMPILE\textunderscore PACKAGES=1 after the path to Rgui.exe in the \textit{Target} field, under the \textit{Shortcut} tab of the R icon \textit{Properties} (accessed by right mouse click on the R icon). \\
+
+
+Upon starting R, from double clicking the icon, the commands to use prior to loading \textit{CausalR} are:
+
+<<>>=
+library(compiler)
+enableJIT=3
+@
+
+When set to greater than zero, {\tt enableJIT} invokes Just-In-Time (JIT) compilation, whilst {\tt $enableJIT=0$} disables it. JIT can also be enabled by starting R with the environment variable {\tt R\_ENABLE\_JIT} set to 1, 2 or 3, depending upon the level required. \textit{CausalR} works with the level set to 3. \\
+
+For further details see, \textit{http://www.inside-r.org/r-doc/compiler/compile} \\ 
+or, alternatively, type $??compiler::compile$ at the R command prompt to pull up the relevant R help page.\\
+
+\noindent The JIT compiler compiles the package the first time it is run. Therefore, in order to achieve speed-up, the user needs to run a small \textit{CausalR} example prior to running a very large one. JIT can also be used for medium sized inputs where the user wishes to run the computationally-expensive exact p-value calculation algorithm. \\
+
+Note: when running very large networks/input the memory available to R may need reconfiguration (this is explained in the R documentation, but one easy way is to start-up R with the command line flag, -max-mem-size=????M, where ???? is a value in KB such that 4000M = 4MB (this can also be inserted in the \textit{Windows} icon \textit{Target} field, see above). Use of 64bit R is also recommended in order to be able to address sufficient memory. 
+
+\end{appendices}
+\end{document}
