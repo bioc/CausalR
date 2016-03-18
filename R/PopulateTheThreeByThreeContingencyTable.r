@@ -14,18 +14,17 @@
 #' @return Vector of calculated values for n0+, n0-, n+0, n-0 and n00 - See: Chindelevitch et al.Bioinformatics (2012).
 
 
-PopulateTheThreeByThreeContingencyTable <- function(n_pp, n_pm, n_mp, n_mm, predictionDataStats, experimentalDataStats){
-  
-  n_pz <- predictionDataStats[1] - n_pp - n_pm
-  n_mz <- predictionDataStats[2] - n_mp - n_mm
-  
-  return(c(n_pp, n_pm, n_pz, 
-           n_mp, n_mm, n_mz, 
-           (experimentalDataStats[1] - n_pp - n_mp), (experimentalDataStats[2] - n_pm - n_mm),(experimentalDataStats[3] - n_pz - n_mz)))
-  
+PopulateTheThreeByThreeContingencyTable <- function(n_pp, n_pm, n_mp, n_mm, predictionDataStats, experimentalDataStats) {
+    
+    n_pz <- predictionDataStats[1] - n_pp - n_pm
+    n_mz <- predictionDataStats[2] - n_mp - n_mm
+    
+    return(c(n_pp, n_pm, n_pz, n_mp, n_mm, n_mz, (experimentalDataStats[1] - n_pp - n_mp), (experimentalDataStats[2] - n_pm - n_mm), (experimentalDataStats[3] - 
+        n_pz - n_mz)))
+    
 }
 
 #' @references
 #' L Chindelevitch et al.
 #' Causal reasoning on biological networks: Interpreting transcriptional changes.
-#' Bioinformatics, 28(8):1114-21, 2012.
+#' Bioinformatics, 28(8):1114-21, 2012. 

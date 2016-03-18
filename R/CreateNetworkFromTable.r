@@ -9,11 +9,11 @@
 #' @return an igraph network
 
 
-CreateNetworkFromTable <- function(dataTable){
-
-
-matrixOfInteractions <- as.matrix(dataTable)
-# Use the first and third colums (names of genes that define an edge) to build the network
-network <- graph.edgelist(matrixOfInteractions[,-2], TRUE)
-return(network)
-}
+CreateNetworkFromTable <- function(dataTable) {
+    
+    
+    matrixOfInteractions <- as.matrix(dataTable)
+    # Use the first and third colums (names of genes that define an edge) to build the network
+    network <- igraph::graph_from_edgelist(matrixOfInteractions[, -2], TRUE)
+    return(network)
+} 

@@ -7,11 +7,11 @@
 #' @return up and down regulation statistics for the experimental data
 
 
-AnalyseExperimentalData <- function(experimentalData){
-
-  
-  experimentalDataStats <- GetNumberOfPositiveAndNegativeEntries(experimentalData)
-  experimentalDataStats[3] <- nrow(experimentalData) - sum(experimentalDataStats[1:2])
-  
-  return(experimentalDataStats)
-}
+AnalyseExperimentalData <- function(experimentalData) {
+    
+    
+    experimentalDataStats <- GetNumberOfPositiveAndNegativeEntries(experimentalData)
+    experimentalDataStats[3] <- nrow(experimentalData) - sum(experimentalDataStats[1:2])
+    
+    return(experimentalDataStats)
+} 

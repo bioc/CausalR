@@ -1,18 +1,19 @@
 Package: CausalR
 Type: Package
-Title: Causal Reasoning on Biological Networks
+Title: Causal Reasoning Methods
 Version: 1.0.0
-Date: 2014-04-9
-Author: Glyn Bradley, Steven Barrett, David Wiley, Bhushan Bonde, Peter
-        Woollard, Chirag Mistry, David Riley
+Date: 2016-03-18
+Author: Glyn Bradley, Steven Barrett, David Wiley, Bhushan Bonde, Peter Woollard, Chirag Mistry, David Riley, Mark Pipe
 Maintainer: Glyn Bradley <glyn.x.bradley@gsk.com>, Steven Barrett
-        <steven.j.barrett@gsk.com>, Bhushan Bonde <bkbonde@gmail.com>
-Description: Causal Reasoning algorithms for biological networks,
-        including predictions, scoring, p-value calculation and ranking
-Depends: R (>= 3.0), igraph
+ <steven.j.barrett@gsk.com>, Bhushan Bonde <bkbonde@gmail.com>
+Description: Causal reasoning methods for biological networks, to enable regulator prediction and reconstruction of regulatory networks from high dimensional data.
+Depends: R (>= 3.2)
 Imports: igraph
 Suggests: knitr, RUnit, BiocGenerics
 VignetteBuilder: knitr
 biocViews: GraphAndNetwork, Network
 License: GPL (>= 2)
+NeedsCompilation: no
+RoxygenNote: 5.0.1
 PackageStatus: Deprecated
+Packaged: 2016-03-18 14:25:22 UTC; barres00

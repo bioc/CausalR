@@ -5,15 +5,14 @@
 #' @return the corresponding score for the given row
 
 
-GetScoreForNumbersOfCorrectandIncorrectPredictions <- function(matrixRow){
-
-numCorrectPositivePredictions <- matrixRow[1]
-numIncorrectPositivePredictions <- matrixRow[2]
-numIncorrectNegativePredictions <- matrixRow[3]
-numCorrectNegativePredictions <- matrixRow[4] 
-
-score <- (numCorrectPositivePredictions + numCorrectNegativePredictions) - 
-		  (numIncorrectPositivePredictions + numIncorrectNegativePredictions)
-
-return(score)
-}
+GetScoreForNumbersOfCorrectandIncorrectPredictions <- function(matrixRow) {
+    
+    numCorrectPositivePredictions <- matrixRow[1]
+    numIncorrectPositivePredictions <- matrixRow[2]
+    numIncorrectNegativePredictions <- matrixRow[3]
+    numCorrectNegativePredictions <- matrixRow[4]
+    
+    score <- (numCorrectPositivePredictions + numCorrectNegativePredictions) - (numIncorrectPositivePredictions + numIncorrectNegativePredictions)
+    
+    return(score)
+} 

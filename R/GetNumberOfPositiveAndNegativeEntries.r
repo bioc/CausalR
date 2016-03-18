@@ -5,15 +5,16 @@
 #' @param dataList an array or dataframe in which the second column is numeric
 #' @return a vector of two components, the first of which giving the number of +1 entries, the second the number of -1's.
 #' @export
+#' @concept CausalR
 #' @examples
-#' expData<-read.table(system.file(package="CausalR", "extdata", "testData.txt"))
+#' expData<-read.table(system.file(package='CausalR', 'extdata', 'testData.txt'))
 #' GetNumberOfPositiveAndNegativeEntries(expData)
 
-GetNumberOfPositiveAndNegativeEntries <- function(dataList){
-
-  
-  data <- as.numeric(dataList[,2])
-  dataStats <- c(sum(data == 1), sum(data == -1))
-  
-  return(dataStats)
-}
+GetNumberOfPositiveAndNegativeEntries <- function(dataList) {
+    
+    
+    data <- as.numeric(dataList[, 2])
+    dataStats <- c(sum(data == 1), sum(data == -1))
+    
+    return(dataStats)
+} 

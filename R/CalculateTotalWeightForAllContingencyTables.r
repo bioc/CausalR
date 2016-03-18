@@ -7,17 +7,15 @@
 
 #' @return a D-value or weight
 
-CalculateTotalWeightForAllContingencyTables<-function(experimentalDataStats, returnlog = FALSE){
-  
-
-  # Total weight is (total number of measured transcripts)!/((number of positive results)!*(number of negative results)!*(number of non-sig. results)!)
-  logOfTotalWeight <- lfactorial(sum(experimentalDataStats)) - (lfactorial(experimentalDataStats[1])  + lfactorial(experimentalDataStats[2])
-		+ lfactorial(experimentalDataStats[3]))
-		
-  if (returnlog){
-      return(logOfTotalWeight)
-  }
-  else{
-      return(exp(logOfTotalWeight))
-  }  
-}
+CalculateTotalWeightForAllContingencyTables <- function(experimentalDataStats, returnlog = FALSE) {
+    
+    # Total weight is (total number of measured transcripts)!/((number of positive results)!*(number of negative results)!*(number of non-sig.
+    # results)!)
+    logOfTotalWeight <- lfactorial(sum(experimentalDataStats)) - (lfactorial(experimentalDataStats[1]) + lfactorial(experimentalDataStats[2]) + lfactorial(experimentalDataStats[3]))
+    
+    if (returnlog) {
+        return(logOfTotalWeight)
+    } else {
+        return(exp(logOfTotalWeight))
+    }
+} 

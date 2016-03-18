@@ -9,9 +9,9 @@
 #' @param network the network to which the IDs are to be added
 #' @return  network with IDs added
 
-AddIDsToVertices <- function(network){
-
-
-numNodes <- vcount(network)
-network <- set.vertex.attribute(network,"ID", 1:numNodes, 1:numNodes)
-}
+AddIDsToVertices <- function(network) {
+    
+    
+    numNodes <- igraph::gorder(network)
+    network <- igraph::set_vertex_attr(network, "ID", 1:numNodes, 1:numNodes)
+} 

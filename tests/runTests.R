@@ -2,9 +2,4 @@
 
 library(igraph)
 
-
 BiocGenerics:::testPackage("CausalR")
-
-
-
-
