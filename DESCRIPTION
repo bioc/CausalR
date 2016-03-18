@@ -15,5 +15,4 @@ biocViews: GraphAndNetwork, Network
 License: GPL (>= 2)
 NeedsCompilation: no
 RoxygenNote: 5.0.1
-PackageStatus: Deprecated
 Packaged: 2016-03-18 14:25:22 UTC; barres00
