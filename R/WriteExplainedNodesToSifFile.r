@@ -10,8 +10,8 @@
 #' @param file a character string (without extension) that determines the names of the files created. Extension is added automatically. Set to NA if not writing to file.
 #' @param display determines if the output written to file is also displayed
 #' @return two files containing paths from hypothesis node to explained nodes in sif format
-#' @export
 #' @concept CausalR
+#' @export
 #' @examples
 #' hypothesisnode <- "Node0"
 #' signOfHypothesis <- +1
@@ -38,7 +38,7 @@ WriteExplainedNodesToSifFile <- function(hypothesisnode, signOfHypothesis, netwo
     for (thisDelta in 1:delta) {
         
         ## Get a table of explained nodes and their values within thisDelta 
-        explainedNodes[[thisDelta]] <- GetExplainedNodesOfCCG(hypothesisnode, +1, network, data,  thisDelta)
+        explainedNodes[[thisDelta]] <- GetExplainedNodesOfCCG(hypothesisnode, signOfHypothesis, network, data,  thisDelta)
         
         ## Get explained nodes from this delta only (not lower delta). I.e. remove nodes that are listed in previous delta
         if (thisDelta == 1) {
