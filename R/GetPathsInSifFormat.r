@@ -9,7 +9,7 @@ GetPathsInSifFormat <- function(arrayOfPaths)  {
     
     listofstuff <- NULL
 
-      if (is.null(arrayOfPaths)) { return(listofstuff)} ## GSK fix for no paths at given delta
+      if (is.null(arrayOfPaths)) { return(listofstuff)}      # GSK fix for no paths at given delta
     
     for (i in 1:nrow(arrayOfPaths)) {
         for (j in 2:ncol(arrayOfPaths)) {

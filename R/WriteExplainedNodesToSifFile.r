@@ -76,5 +76,4 @@ WriteExplainedNodesToSifFile <- function(hypothesisnode, signOfHypothesis, netwo
         cat(output, sep = "\n")
     }
     
-
 }
