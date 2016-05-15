@@ -1,7 +1,7 @@
 Package: CausalR
 Type: Package
 Title: Causal Reasoning Methods
-Version: 1.4.2
+Version: 1.4.3
 Date: 2016-05-09
 Author: Glyn Bradley, Steven Barrett, David Wiley, Bhushan Bonde, Peter Woollard, Chirag Mistry, David Riley, Mark Pipe
 Maintainer: Glyn Bradley <glyn.x.bradley@gsk.com>, Steven Barrett
