@@ -8,27 +8,30 @@
 GetPathsInSifFormat <- function(arrayOfPaths)  {
     
     listofstuff <- NULL
-
-      if (is.null(arrayOfPaths)) { return(listofstuff)} ## GSK fix for no paths at given delta
     
-    for (i in 1:nrow(arrayOfPaths)) {
-        for (j in 2:ncol(arrayOfPaths)) {
-            
-            from <- arrayOfPaths[i,j-1]
-            to <- arrayOfPaths[i,j]
-            
-            finalChars <- paste(substr(from, nchar(from), nchar(from)), substr(to, nchar(to), nchar(to)), sep="")
-            
-            if (finalChars=="++" || finalChars=="--") {
-                word = "Activates"
-            } else if (finalChars=="+-" || finalChars=="-+"){
-                word = "Inhibits"
-            } else {
-                stop(paste("Error: Nodes should end in either + or -"))
+    if (!is.null(arrayOfPaths)) {
+        if (length(arrayOfPaths) > 0) {
+            for (i in 1:nrow(arrayOfPaths)) {
+                for (j in 2:ncol(arrayOfPaths)) {
+                    
+                    from <- arrayOfPaths[i,j-1]
+                    to <- arrayOfPaths[i,j]
+                    
+                    finalChars <- paste(substr(from, nchar(from), nchar(from)), substr(to, nchar(to), nchar(to)), sep="")
+                    
+                    if (finalChars=="++" || finalChars=="--") {
+                        word = "Activates"
+                    } else if (finalChars=="+-" || finalChars=="-+"){
+                        word = "Inhibits"
+                    } else {
+                        stop(paste("Error: Nodes should end in either + or -"))
+                    }
+                    
+                    listofstuff <- rbind(listofstuff, paste(substr(arrayOfPaths[i,j-1], 1, nchar(arrayOfPaths[i,j-1])-1), word, substr(arrayOfPaths[i,j], 1, nchar(arrayOfPaths[i,j])-1), sep="\t"))
+                }
             }
-            
-            listofstuff <- rbind(listofstuff, paste(substr(arrayOfPaths[i,j-1], 1, nchar(arrayOfPaths[i,j-1])-1), word, substr(arrayOfPaths[i,j], 1, nchar(arrayOfPaths[i,j])-1), sep="\t"))
         }
     }
+    
     return(unique(listofstuff))
 }

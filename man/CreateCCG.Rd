@@ -4,10 +4,14 @@
 \alias{CreateCCG}
 \title{create a Computational Causal Graph (CCG)}
 \usage{
-CreateCCG(filename)
+CreateCCG(filename, nodeInclusionFile = NULL, excludeNodesInFile = TRUE)
 }
 \arguments{
 \item{filename}{file name of the network file (in .sif file format)}
+
+\item{nodeInclusionFile}{optional path to a text file listing nodes to exclude in the CCG (or include - see argument excludeNodesInFile).}
+
+\item{excludeNodesInFile}{flag to determine if nodes in inclusion file should be taken as nodes to include or nodes to exclude. Default is TRUE to exclude.}
 }
 \value{
 an igraph object containing the CCG.

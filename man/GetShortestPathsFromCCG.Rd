@@ -5,7 +5,7 @@
 \title{get shortest paths from CCG}
 \usage{
 GetShortestPathsFromCCG(network, hypothesisnode, targetnode,
-  showbothdirs = FALSE, display = TRUE)
+  showbothdirs = FALSE, quiet = FALSE)
 }
 \arguments{
 \item{network}{built from iGraph}
@@ -16,7 +16,7 @@ GetShortestPathsFromCCG(network, hypothesisnode, targetnode,
 
 \item{showbothdirs}{where multiple paths from a positive and negative node, FALSE returns only the shortest. Otherwise both are returned.}
 
-\item{display}{if true, echo the rsulting paths to the screen}
+\item{quiet}{a flag to suppress output to console. FALSE by default.}
 }
 \value{
 a list of vectors containing the nodes of individual paths

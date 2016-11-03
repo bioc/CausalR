@@ -30,6 +30,9 @@ MakePredictionsFromCCG <- function(hypothesisnode, signOfHypothesis, network, de
     # indicating up/down regulation.  (It generally shouldn't be necessary to reverse the sign of a node when working from a CCG, but this facility is
     # included for consistency with MakePredictionsFromCG)
     
+    signOfHypothesis <- as.integer(signOfHypothesis)
+    delta <- as.integer(delta)
+    
     if (is.numeric(hypothesisnode)) {
         hypothesis <- hypothesisnode
     } else {

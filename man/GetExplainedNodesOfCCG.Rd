@@ -4,7 +4,8 @@
 \alias{GetExplainedNodesOfCCG}
 \title{Get explained nodes of CCG}
 \usage{
-GetExplainedNodesOfCCG(hypothesisnode, signOfHypothesis, network, data, delta)
+GetExplainedNodesOfCCG(hypothesisnode, signOfHypothesis, network,
+  experimentalData, delta)
 }
 \arguments{
 \item{hypothesisnode}{a hypothesis node}
@@ -13,7 +14,7 @@ GetExplainedNodesOfCCG(hypothesisnode, signOfHypothesis, network, data, delta)
 
 \item{network}{a computational causal graph}
 
-\item{data}{a data file}
+\item{experimentalData}{The experimental data read in using \link{ReadExperimentalData}. The results is an n x 2 matrix; where the first column contains the node ids of the nodes in the network that the results refer to. The second column contains values indicating the direction of regulation in the results - (+)1 for up, -1 for down and 0 for insignificant amounts of regulation. The name of the first column is the filename the data was read from.}
 
 \item{delta}{the number of edges across which the hypothesis should be followed}
 }

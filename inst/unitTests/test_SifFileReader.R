@@ -1,5 +1,5 @@
-# Copyright: Copyright 2012 GSK. All rights reserved *** SVN *** LastChanged: $Date: 2015-12-15 11:36:58 +0000 (Tue, 15 Dec 2015) $ Changed By:
-# $Author: pipm $ Version: $Revision: 553 $ Source: $HeadURL: https://stevenagefs:7777/7412/trunk/NetworkFileReader/test_SifFileReader.R $ ***
+# Copyright: Copyright 2012 GSK. All rights reserved *** SVN *** LastChanged: $Date: 2016-09-21 17:28:25 +0100 (Wed, 21 Sep 2016) $ Changed By:
+# $Author: pipm $ Version: $Revision: 636 $ Source: $HeadURL: https://stevenagefs:7777/7412/trunk/NetworkFileReader/test_SifFileReader.R $ ***
 # Summary *** Description: A test function for the CreateCG and CreateCCG functions
 
 # Create a table to be used in the testsuite for CreateCG
@@ -127,6 +127,31 @@ test_CreateDoubleNetworkWorksCorrectly. <- function() {
     checkEquals(igraph::V(network)[5]$name, "node1-")
     checkEquals(igraph::V(network)[6]$name, "node2-")
 }
+
+test_CreateDoubleNetworkWorksCorrectlyWithInclusionListAndExcludeTrue <- function() {
+    network <- CausalR::CreateCCG(system.file("testData", "test_network.sif", package = "CausalR"),
+                                  system.file("unitTests", "test_nodeInclusionFile.txt", package = "CausalR"),
+                                  TRUE)
+    checkEquals(igraph::gorder(network), 4)
+    checkEquals(igraph::gsize(network), 2)
+    checkEquals(igraph::V(network)[1]$name, "node0+")
+    checkEquals(igraph::V(network)[2]$name, "node2+")
+    checkEquals(igraph::V(network)[3]$name, "node0-")
+    checkEquals(igraph::V(network)[4]$name, "node2-")
+}
+
+test_CreateDoubleNetworkWorksCorrectlyWithInclusionListAndExcludeFalse <- function() {
+    network <- CausalR::CreateCCG(system.file("testData", "test_network.sif", package = "CausalR"),
+                                  system.file("unitTests", "test_nodeInclusionFile.txt", package = "CausalR"),
+                                  FALSE)
+    checkEquals(igraph::gorder(network), 4)
+    checkEquals(igraph::gsize(network), 2)
+    checkEquals(igraph::V(network)[1]$name, "node0+")
+    checkEquals(igraph::V(network)[2]$name, "node1+")
+    checkEquals(igraph::V(network)[3]$name, "node0-")
+    checkEquals(igraph::V(network)[4]$name, "node1-")
+}
+
 
 test_CreateDoubleNetworkFailsWhenGivenANonsenseFile <- function() {
     checkException(CausalR::CreateCCG("nonExistentFile.sif"))

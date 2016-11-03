@@ -6,30 +6,57 @@
 #' @param hypothesisnode a hypothesis node
 #' @param signOfHypothesis the direction of change of hypothesis node
 #' @param network a computational causal graph
-#' @param data a data file
+#' @param experimentalData The experimental data read in using \link{ReadExperimentalData}. The results is an n x 2 matrix; where the first column contains the node ids of the nodes in the network that the results refer to. The second column contains values indicating the direction of regulation in the results - (+)1 for up, -1 for down and 0 for insignificant amounts of regulation. The name of the first column is the filename the data was read from.
 #' @param delta the number of edges across which the hypothesis should be followed
 #' @return vector of explained nodes
 
-GetExplainedNodesOfCCG <- function(hypothesisnode, signOfHypothesis, network, data, delta) {
-    experimentalData <- ReadExperimentalData(data, network)
+GetExplainedNodesOfCCG <- function(hypothesisnode, signOfHypothesis, network, experimentalData, delta) {
+    
+    signOfHypothesis <- as.integer(signOfHypothesis)
+    delta <- as.integer(delta)
+    
     predictions <- MakePredictionsFromCCG(hypothesisnode, signOfHypothesis, network, delta)
     experimentalDataByName <- GetNodeName(network, experimentalData)
     predictionsByName <- GetNodeName(network, predictions)
     
-    ## Merge the experimental data and prediction data tables to create a table containing only the
-    ## nodes that are contained in both the experiment and prediction data
-    tableOfMatches <- merge.default(experimentalDataByName, predictionsByName, by = c(TRUE, FALSE))
+    # Set the column names - needed before merge
+    colnames(experimentalDataByName) <- c("name", "exp")
+    colnames(predictionsByName) <- c("name", "pred")
     
-    # Tidy up tableOfMatches - remove factors and convert number holding strings to integers
+    ## Merge the experimental data and prediction data tables by first (name) column to create a
+    ## table containing all nodes from both the experimental and prediction data
+    tableOfMatches <- merge.default(experimentalDataByName, predictionsByName, all=TRUE, by = c(TRUE, FALSE))
+
+    # Tidy up tableOfMatches - convert from factors to strings then to integers
     i <- sapply(tableOfMatches, is.factor)
     tableOfMatches[i] <- lapply(tableOfMatches[i], as.character)
-    tableOfMatches[,2] <- as.integer(tableOfMatches[,2])
-    tableOfMatches[,3] <- as.integer(tableOfMatches[,3])
+    tableOfMatches[,"name"] <- as.character(tableOfMatches[,"name"])
+    tableOfMatches[,"exp"] <- as.integer(tableOfMatches[,"exp"])
+    tableOfMatches[,"pred"] <- as.integer(tableOfMatches[,"pred"])
+
+    # Filter to only nodes that appear in both experimental and predictions
+    tableOfMatches <- tableOfMatches[apply(tableOfMatches, 1, function(x) !any(is.na(x))),]
     
+    # Get nodes that have the same regulation value for experimental and predictions
+    corExplainedNodes <- tableOfMatches[tableOfMatches[,"exp"]*tableOfMatches[,"pred"] == 1,]
+    #corExplainedNodes <- corExplainedNodes[corExplainedNodes[,"name"] != hypothesisnode,]
+    
+    # Get nodes that have different and non-zero values for experimental and predictions
+    incorExplainedNodes <- tableOfMatches[tableOfMatches[,"exp"]*tableOfMatches[,"pred"] == -1,]
+    
+    # Get nodes that are in experimental but not in predictions 
+    ambExplainedNodes <- tableOfMatches[tableOfMatches[,"pred"] == 0 & tableOfMatches[,"exp"] != 0,]
+    # ambExplainedNodes <- tableOfMatches[apply(tableOfMatches, 1, function(x) any(is.na(x))),]
+    
+    
+    ## In table of matches column 1 contains the name, column 2 contains experimental data and
+    ## column 3 contains predictions data.
     ## Explained nodes are those where the experimental value matches the prediction.
-    ## Return a list of explained nodes with column 1 containing the names of the nodes
+    ## Get a table of explained nodes with column 1 containing the names of the nodes
     ## and column 2 containing the value (+1 or -1)
-    explainedNodes <- tableOfMatches[tableOfMatches[,2]==tableOfMatches[,3],1:2]
+    #explainedNodes <- tableOfMatches[tableOfMatches[,2]==tableOfMatches[,3],1:2]
+    
+    explainedNodes <- list(corExplainedNodes = corExplainedNodes, incorExplainedNodes = incorExplainedNodes, ambExplainedNodes = ambExplainedNodes)
     
     return(explainedNodes)
 }

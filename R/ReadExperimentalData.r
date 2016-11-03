@@ -22,9 +22,6 @@
 #' ReadExperimentalData(fileName, ccg)
 
 
-
-
-
 ReadExperimentalData <- function(fileName, network, removeDuplicates = TRUE) {
     
     if (!(igraph::is_igraph(network) || is.null(network))) {
@@ -55,6 +52,8 @@ ReadExperimentalData <- function(fileName, network, removeDuplicates = TRUE) {
         return(table)
     } else {
         processedData <- ProcessExperimentalData(table, network)
+        # Name the first column from the fileName without the path or the extension
+        colnames(processedData) <- c(tools::file_path_sans_ext(basename(fileName)), NA)
         return(processedData)
     }
 } 

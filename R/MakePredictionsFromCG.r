@@ -10,10 +10,17 @@
 #' @param delta the number of edges across which the hypothesis should be followed
 #' @param nodesInExperimentalData the number of nodes in experimental data
 #' @return an matrix containing the relationship between each node and the hypothesis
+#' @export
 #' @concept CausalR
-
+#' @examples
+#' network <- system.file(package='CausalR', 'extdata', 'testNetwork.sif')
+#' cg <- CreateCG(network)
+#' MakePredictionsFromCG('NodeA', +1, cg, 2)
 
 MakePredictionsFromCG <- function(hypothesisnode, signOfHypothesis, network, delta, nodesInExperimentalData = NULL) {
+    
+    signOfHypothesis <- as.integer(signOfHypothesis)
+    delta <- as.integer(delta)
     
     if (is.numeric(hypothesisnode)) {
         hypothesis <- hypothesisnode

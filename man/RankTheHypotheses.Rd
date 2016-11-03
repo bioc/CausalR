@@ -7,12 +7,13 @@
 RankTheHypotheses(network, experimentalData, delta, epsilon = 1e-05,
   useCubicAlgorithm = TRUE, use1bAlgorithm = TRUE, symmetricCCG = TRUE,
   listOfNodes = NULL, correctPredictionsThreshold = -Inf, quiet = FALSE,
-  doParallel = FALSE, numCores = NULL)
+  doParallel = FALSE, numCores = NULL, writeFile = TRUE,
+  outputDir = getwd())
 }
 \arguments{
 \item{network}{Computational Causal Graph, as an igraph.}
 
-\item{experimentalData}{The experimental data read in using \link{ReadExperimentalData}. The results is an n x 2 matrix; where the first column contains the node ids of the nodes in the network that the results refer to. The second column contains values indicating the direction of regulation in the results - (+)1 for up, -1 for down and 0 for insignificant amounts of regulation.}
+\item{experimentalData}{The experimental data read in using \link{ReadExperimentalData}. The results is an n x 2 matrix; where the first column contains the node ids of the nodes in the network that the results refer to. The second column contains values indicating the direction of regulation in the results - (+)1 for up, -1 for down and 0 for insignificant amounts of regulation. The name of the first column is the filename the data was read from.}
 
 \item{delta}{Distance to search within the causal graph.}
 
@@ -28,11 +29,15 @@ RankTheHypotheses(network, experimentalData, delta, epsilon = 1e-05,
 
 \item{correctPredictionsThreshold}{A threshold on the number of correct predictions for a given hypothesis. If a hypothesis produces fewer correct predictions than predictionsThreshold then the algorithm will not calculate the two p-values. Instead 'NA' will be displayed in the final two columns of the corresponding row of the results table. As a default correctPredictionsThreshold is set as -Inf, so that the p-values are calculated for all specified hypotheses.}
 
-\item{quiet}{a flag to supress progress output. FALSE by default.}
+\item{quiet}{a flag to suppress output to console. FALSE by default.}
 
 \item{doParallel}{A flag for running RankTheHypothesis in parallel mode.}
 
 \item{numCores}{Number of cores to use if using parallel mode. If the default value of NULL is used, it will attempt to detect the number of cores available and use all of them bar one.}
+
+\item{writeFile}{A flag for determining if the output should be written to a file in the working directory. Default is TRUE.}
+
+\item{outputDir}{the directory to output the files to. Default is the working directory}
 }
 \value{
 A data frame containing the results of the algorithm.
@@ -42,17 +47,17 @@ Rank the hypotheses in the causal network. This function can be run with paralle
 }
 \examples{
 #get path to example network file
-network <- system.file(package='CausalR', 'extdata', 'testNetwork.sif')
+networkFile <- system.file(package='CausalR', 'extdata', 'testNetwork.sif')
 #create ccg
-ccg <- CreateCCG(network)
+network <- CreateCCG(networkFile)
 #get path to example experimental data
-fileName<- system.file(package='CausalR', 'extdata', 'testData.txt')
+experimentalDataFile <- system.file(package='CausalR', 'extdata', 'testData.txt')
 #read in experimetal data
-expData<- ReadExperimentalData(fileName, ccg)
+experimentalData <- ReadExperimentalData(experimentalDataFile, network)
 #run in single threaded mode
-RankTheHypotheses(ccg, expData, 2)
+RankTheHypotheses(network, experimentalData, 2)
 #run in parallel mode
-RankTheHypotheses(ccg, expData, 2, doParallel=TRUE, numCores=2)
+RankTheHypotheses(network, experimentalData, 2, doParallel=TRUE, numCores=2)
 }
 \references{
 L Chindelevitch et al.

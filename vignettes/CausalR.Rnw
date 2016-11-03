@@ -46,7 +46,9 @@ Hypothesis Scoring and P-value Calculation}
 \section{Introduction}
 
 \textit{CausalR} provides for the Bioconductor project functionality to discover the top regulators explaining observed measurements through prior knowledge supplied in the form of a causal network.\textit{CausalR} computes how well predictions from a hypothesis (a network node assigned with a regulatory direction), or a set of such, represent differential outcomes observed in experimental data, such as from microarray or NGS sequencing.
+
 \vspace{5mm}
+
 This predictiveness is expressed as a unique score to which a level of significance is computed and assigned for each regulator hypothesis. To acquire the most robust hypotheses for what has been observed experimentally, sets of hypotheses (from all nodes within the input network) can be filtered on their significance and ranked according to descending score, as can be seen below in Table 1.
 
 \begin{table}[h!]
@@ -92,7 +94,7 @@ Node0 &-1 &-4 &1 &5 &1 &0.971 &1 \\ [1ex]
 \label{tab:t1}
 \end{table}
 
-The \textit{SCAN} methodology is also provided as an alternative approach that relies more upon known properties of pathway regulators for the acquisition of robust hypotheses. For further background on methodological details, suggested analysis approaches and actual biological causal networks with matching signal data, see Bradley etal. \cite{tobeSubmitted}. Table 1 represents the actual ranked hypotheses output produced by executing the following sequence of functions {\tt CreateCCG()}, {\tt ReadExperimentalData()} then {\tt RankTheHypotheses()} provided with the same network and experimental data used in the following text. For convenience, the complete set of commands, with details of  further functionality, are listed in Appendix A in the form of an R script.
+The \textit{SCAN} methodology is also provided as an alternative approach that relies more upon known properties of pathway regulators for the acquisition of robust hypotheses. For further background on methodological details, suggested analysis approaches and actual biological causal networks with matching signal data, see Bradley and Barrett \cite{submitted}. Table 1 represents the actual ranked hypotheses output produced by executing the following sequence of functions {\tt CreateCCG()}, {\tt ReadExperimentalData()} then {\tt RankTheHypotheses()} provided with the same network and experimental data used in the following text. For convenience, the complete set of commands, with details of  further functionality, are listed in Appendix A in the form of an R script.
 
 \vspace{5mm}
 The following tutorial text provides a step-by-step series of examples on using \textit{CausalR}, together with further descriptive explanation of what is happening at each stage.
@@ -108,7 +110,7 @@ library(CausalR)
 
 The loading of the main package also performs 
 
-<<>>=
+<<eval=FALSE>>=
 library(igraph)
 @
 
@@ -163,7 +165,7 @@ Note that although only directional connectivity is shown, edge sign attribution
 
 \vspace{5mm}
 
-The {\tt CreateCCG()} function creates in the workspace an \textit{igraph} object called "ccg" which contains a computational causal network representation of the contents of the input network.sif file.
+The {\tt CreateCCG()} function creates in the workspace an \textit{igraph} object (here assigned to "ccg") which contains a computational causal network representation of the contents of the input network.sif file.
 
 <<>>=
 ccg <- CreateCCG(system.file( "extdata", "testNetwork1.sif", 
@@ -174,7 +176,7 @@ The latter is employed internally instead of a CG for processing efficiency.
 
 \vspace{5mm}
 
-A CCG contains duplicated vertices to separately represent up and down regulation of each node, and these are connected according to the original edge relations from the network.sif file. The Computational Causal Graph (CCG) for the input network input can be visualised via,
+A CCG contains double the nodes and vertices, to separately represent up and down regulation of each node, and these are connected according to the original edge relations from the network.sif file. The Computational Causal Graph (CCG) for the input network input can be visualised via,
 
 
 <<>>=
@@ -221,7 +223,7 @@ These are flagged to the user and excluded from the two column experimental data
 \section{Computing Score: Multiple Causal Hypotheses}
 
 
-To compute a list of score-ranked hypotheses (as in Table 1) within an interactive session, the user would employ the {\tt RankTheHypotheses()} function (see Appendix B instructions for running in parallel) as follows, 
+To compute a list of score-ranked hypotheses within an interactive session, the user would employ the {\tt RankTheHypotheses()} function as follows, 
 
 {\scriptsize
 <<>>=
@@ -229,6 +231,10 @@ options(width=120)
 RankTheHypotheses(ccg, experimentalData, delta=2) 
 @
 }
+
+{\tt RankTheHypotheses()} incorporates usability features (see Section 9) and parallelisation is supported (see Appendix B for instructions).
+
+\vspace{5mm}
 
 Alternatively, the following is used to output similar (results for both + and - hypotheses will again be generated) for a subset of nodes,
 
@@ -404,7 +410,7 @@ A lower significance (higher p-value) cut-off can then be applied as a filter to
 
 \vspace{5mm}
 
-\textit{CausalR} provides both p-values and enrichment p-values for this purpose. There are two alternatives for p-value calculation: a computationally expensive exact "quartic" algorithm (see section 2.4 in \cite{2012a}) and (for larger inputs) a very much more efficient (minutes instead of hours)  approximate "cubic" algorithm (see pages 6-7 in \cite{2012b}). 
+\textit{CausalR} provides both p-values and enrichment p-values for this purpose. There are two alternatives for p-value calculation: a computationally expensive exact "quartic" algorithm (see section 2.4 in \cite{2012a}) and (for larger inputs) a very much more efficient (minutes instead of hours, hence set as default)  approximate "cubic" algorithm (see pages 6-7 in \cite{2012b}). 
 
 \subsection{Calculation of p-value}
 
@@ -510,17 +516,17 @@ subset(Rankfor4,Correct>=4)
 @
 }
 
-This can also be useful where the user wishes to employ the more computationally expensive exact (cubic) algorithm on a subset of interesting hypotheses, instead of using the (default) approximation algorithm.
+This can also be useful where the user wishes to employ the more computationally expensive exact quartic (1a) algorithm on a subset of interesting hypotheses, instead of using the default cubic (1b) approximation algorithm.
 
 \newpage
 
 \section{Sequential Causal Analysis of Networks (SCAN)}
 
-Given that true causal regulators are likely to regulate nodes at various distances along the pathways in which they feature, the use of a range of different deltas can be employed to improve enrichment for them. This was the thinking behind Sequential Causal Analysis of Networks ($SCAN$) approach introduced in Bradley \textit{et al.}\cite{tobeSubmitted}.
+Given that true causal regulators are likely to regulate nodes at various distances along the pathways in which they feature, the use of a range of different deltas can be employed to improve enrichment for them. This was the thinking behind Sequential Causal Analysis of Networks ($SCAN$) approach introduced in Bradley and Barrett \cite{submitted}.
 
 \vspace{5 mm}
 
-By invoking the {\tt runSCANR()} function \textit{CausalR} is iteratively run for a range of path lengths ({\tt deltas}), starting  from {\tt delta=1} up to the value of the user-supplied variable {\tt NumberOfDeltaToScan} (default is 5), to discover nodes that consistently score in the highest  {\tt topNumGenes} (default is 150) across all SCAN deltas run.
+By invoking the {\tt runSCANR()} function, the {\tt RankThehypotheses()} function is iteratively run for a range of path lengths ({\tt deltas}), starting  from {\tt delta=1} up to the value of the user-supplied variable {\tt NumberOfDeltaToScan} (default is 5), to discover nodes that consistently score in the highest  {\tt topNumGenes} (default is 150) across all SCAN deltas run.
 
 \vspace{8 mm}
 
@@ -551,26 +557,75 @@ and a more complex network, as in the {\tt Cytoscape} (\textit{http:www.cytoscap
 
 \vspace{5mm}
 
-The {\tt runSCANR()} function will first write the number of nodes to analyse to the R console window (this will be repeated for each delta run). Then the next {\tt NumberOfDeltaToScan} lines output will list the top hypotheses from each delta that was run, whilst the final line gives the ScanR results for the top hypotheses in common between these deltas. 
+The {\tt runSCANR()} function will first write the number of nodes to analyse to the R console window (this will be repeated for each delta run). Then the next {\tt NumberOfDeltaToScan} lines output will list the top hypotheses from each delta that was run, whilst the final line gives the SCAN results for the top hypotheses in common between these deltas. 
 
-\vspace{5mm}
+\vspace{1mm}
 
 <<>>=
-runSCANR(ccg, experimentalData, NumberOfDeltaToScan=2, topNumGenes=4,
-         correctPredictionsThreshold=1)
+runSCANR(ccg, experimentalData, numberOfDeltaToScan=2, topNumGenes=4, 
+         correctPredictionsThreshold=1,writeResultFiles = TRUE, 
+         writeNetworkFiles = "none",quiet=TRUE)
 @
+{\tt testList} contains the hypotheses found at each delta, as restricted by topNumGenes.
 
-Line [1] is the top scoring 4 hypotheses from delta 1 \\
-Line [2] is the top scoring 4 hypotheses from delta 2 \\
-Line [3] is the SCANR results, i.e. the hypotheses in common between the sets of top ranked ones coming from each delta.
+\vspace{5mm}
+{\tt uniqueNodes} contains all hypotheses, with the maximum delta that returned them.
+
+\vspace{5mm}
+{\tt commonNodes} contains only the hypotheses subset ranked in the first topNumGenes of all hypotheses across ALL deltas run, and these are ranked in order found at the highest delta.
 
 \vspace{5mm}
 
-From experiments with \textit{CausalR} on signals for known pathways (see Bradley \textit{et al.}\cite{tobeSubmitted}), setting of the {\tt topNumGenes} parameter to represent 1 percent of the number of nodes present in the input network provides a reliable starting heuristic for identifying the true regulators.
+Additionally, under the above settings, three files are created in the current R workspace:
 
 \vspace{5mm}
 
-Typically a full SCAN execution can take overnight with large inputs and larger deltas. However, various steps can be taken to improve run times:
+1. A common nodes file: CommonNodes-testNetwork1-testData1-deltaScanned2-top4.txt
+
+Containing:
+\begin{verbatim}
+Node1+
+Node0+
+Node3+
+Node5-
+\end{verbatim}
+
+This content is equivalent to that in {\tt commonNodes} above.
+
+\vspace{5mm}
+
+2. A top nodes file: TopNodes-testNetwork1-testData1-deltaScanned2-top4.txt
+
+Containing:
+\begin{verbatim}
+names  maxDelta
+Node1+	2
+Node0+	2
+Node3+	2
+Node5-	2
+\end{verbatim}
+
+This content is equivalent to that in uniqueNodes above.
+
+\vspace{5mm}
+
+3. A ResultsTable: ResultsTable-NetworkFileName-ExptlDataFileName-deltaused.txt containing RankTheHypotheses()output for the highest delta run.
+
+\vspace{5mm}
+
+Note that the above files are auto-named according to the input files and content-defining parameters (more details in Section 9).
+
+\vspace{5mm}
+
+Hypothesis-specific regulatory networks can be generated directly by {\tt runSCANR()} , from the commonNode list, however the returned number of common hypotheses won't apriori be known (see Section 8 for details of direct and indirect hypothesis regulatory network file creation).
+
+\vspace{5mm}
+
+From experiments with \textit{CausalR} on signals for known pathways (see Bradley and Barrett \cite{submitted}), setting of the {\tt topNumGenes} parameter to represent 1 percent of the number of nodes present in the input network provides a reliable starting heuristic for identifying the true regulators.
+
+\vspace{5mm}
+
+A SCAN run covering 1-5 deltas can typically take overnight with large inputs, however parallelisation is supported via setting {\tt doParallel=TRUE}). Various additional steps can also be taken to improve run times:
 
 \begin{enumerate}
     \item Use of the R compiler (see Appendix B)
@@ -588,10 +643,10 @@ runSCANR(ccg, ReadExperimentalData("DifferentialData.txt", ccg),
         correctPredictionsThreshold=2)
 @
 
-\item Suppression of significance calculations. Note that these will be inaccurate and unused anyway if non-differential results are excluded, as with \textit{SCAN} we are relying more upon biological logic rather statistics. This can be achieved via the correctPredictionsThreshold parameter, which has a  default of 4 that can be overridden  to  higher value (scores will still be computed for all hypotheses).
+\item Suppression of significance calculations. Note that these will be inaccurate and unused anyway if non-differential results are excluded, as with \textit{SCAN} we are relying more upon biological logic rather statistics. As this is the usual scenario, the {\tt correctPredictionsThreshold} parameter is set with a default value of Inf (infinity, so as to not compute p-values, substituting NAs for them. Scoring and rankings will still be computed for all hypotheses). {\tt correctPredictionsThreshold} can be set to a lower value if accurate p-values are required for a partial or full set of hypotheses scored.
 \end{enumerate}
 
-Accurate p-values and pE-values can later be computed separately for the subset of interesting hypotheses coming from \textit{SCAN}  using,
+Accurate p-values and pE-values can also later be computed separately for the subset of interesting hypotheses coming from \textit{SCAN}  using,
 
 <<results='hide'>>=
 testlist<-c('Node0','Node3','Node2')
@@ -608,54 +663,161 @@ Alternatively, for an individual signed node hypothesis, the user can start from
 
 \section{Visualising the Network of Nodes explained by a Specific Hypothesis}
 
+Hypothesis-specific regulatory sub-networks can be generated indirectly (i.e. after running SCAN) for individual hypotheses or all hypotheses, as well as directly via {\tt runSCANR()} itself.
+
+\subsection{Indirect Individual Hypothesis Network Generation} 
+
 The function {\tt WriteExplainedNodesToSifFile()} allows production of a network of explained nodes, for a particular hypothesis, in .sif file format for visualising in Cytoscape. The function is called as follows: \\ 
 
 <<eval=FALSE>>=
-WriteExplainedNodesToSifFile("IL1A", +1, ccg, experimentalData, 
-                                       delta, file="testOutput")
+WriteExplainedNodesToSifFile("Node1", +1,ccg,experimentalData,delta=2)
 @
 
-This will produce a .sif file {\tt testOutput.sif} representing all of the explained nodes (i.e. nodes that have the same direction of regulation in both the network and the experimental data under the hypothesis of up-regulated IL1A), with content structured as follows: 
+Unless directed elsewhere, this creates six new files in the working directory:
+
+\begin{verbatim}
+corExplainedNodes-testNetwork1-testData1-delta2-Node1+.sif
+corExplainedNodes-testNetwork1-testData1-delta2-Node1+_anno.txt
+
+incorExplainedNodes-testNetwork1-testData1-delta2-Node1+.sif
+incorExplainedNodes-testNetwork1-testData1-delta2-Node1+_anno.txt
+
+ambExplainedNodes-testNetwork1-testData1-delta2-Node1+.sif
+ambExplainedNodes-testNetwork1-testData1-delta2-Node1+_anno.txt
+\end{verbatim}
+
+
+The correctly explained nodes (corExplainedNodes) .sif file contains interactions representing all of the explained nodes (i.e. nodes that have the same direction of regulation in both the network and the experimental data, as predicted under the hypothesis of up-regulated Node1+, with content structured as follows,
 
 %\vspace{5mm}
 
 \begin{verbatim}
-IL1A  Activates  ATF3
-IL1A  Activates  BDKRB1
-IL1A  Activates  BIRC2
-IL1A  Activates  CEBPD
-IL1A  Inhibits   CAMLG
-IL1A  Inhibits   TIMP4
+Node1  Activates	Node1
+Node1	Activates	Node3
+Node1	Inhibits	Node5
 \end{verbatim}
 
 %\vspace{5mm}
 
-A corresponding annotation file {\tt testOutput\_anno.txt} is also created. This file contains the explained node regulation values, 
+The corresponding (corExplainedNodes) annotation file contains the respective explained node regulation values,
 
 %\vspace{5mm}
 
 \begin{verbatim}
 NodeID  Regulation
-ATF3       1
-BDKRB1     1
-BIRC2      1
-CEBPD      1
-IL1A       1
-CAMLG      -1
-TIMP4      -1
+Node1	1
+Node3	1
+Node5	-1
 \end{verbatim}
 
 %\vspace{5mm}
 
-These files can be loaded into Cytoscape to visualise the explained nodes.
+
+These files can be directly loaded into Cytoscape to visualise the regulatory network of hypothesis-explained nodes, such as in figure 4.
+
+
+\begin{figure}[ht]
+    \includegraphics{Fig4.png}
+    \caption{ Example hypothesis-specific regulatory network (Cytoscape view). }
+    \label{fig:f4}
+\end{figure}
+
+
+
+
+\subsection{Indirect Network Generation for All Hypotheses found Common across SCAN Deltas} 
+
+An additional function, {\tt WriteAllExplainedNodesToSifFile()}, accepts the {\tt commonNodes} component of the {\tt scanResults} workspace object (assigned to store the {\tt runSCANR()} output) to generate networks for all the hypotheses found in common across all SCAN delta settings:
+
+<<>>=
+scanResults <- runSCANR(ccg, experimentalData, numberOfDeltaToScan=2, 
+  topNumGenes=4,correctPredictionsThreshold=1,
+  writeResultFiles = FALSE, writeNetworkFiles = "none",quiet=FALSE)
+WriteAllExplainedNodesToSifFile(scanResults, ccg, experimentalData, 
+  delta=2, correctlyExplainedOnly = TRUE, quiet = TRUE)
+@
+
+This produces pairs of {\tt corExplainedNodes} .sif and annotation network files for all hypotheses (Node0+, Node1+, Node3+ and Node5-), in each case including only those experimental data nodes that are correctly explained by that hypothesis (i.e. as defined by using writeNetworkFiles = "correct" instead of "all").
+
+\subsection{Direct Network Generation for All Hypotheses found Common across SCAN Deltas }
+
+The following command shows how to generate the same networks as in the latter example above, only directly from {\tt runSCANR()}
+
+
+<<eval=FALSE>>=
+runSCANR(ccg, experimentalData, numberOfDeltaToScan=2, 
+  topNumGenes=4,correctPredictionsThreshold=1,quiet=TRUE,
+  writeResultFiles = TRUE, writeNetworkFiles = "correct")
+@
+
+Files generated in this way get the full input auto-naming, i.e. corExplainedNodes-testNetwork1-testData1-delta2-top4-Node0+.sif, but care needs to be taken to sensibly try to restrict the set of common nodes produced by {\tt runSCANR()} otherwise there may be very many!
+
+\newpage
+
+
+\section{Additional Usability Features}
+
+
+\subsection{Automated File Naming}
+
+The {\tt RankTheHypotheses()} and {\tt runSCANR()} functions will auto-name their primary output files with names that identify all relevant inputs and parameterisations employed.
+
+%\vspace{5mm}
+
+These filenames will therefore contain the input network filename, input experimental signal filename and the input {\tt delta} parameter value. 
+
+%\vspace{5mm}
+
+The results table produced by {\tt runSCANR()} will also feature the {\tt topNumGenes} parameter value.
+
+%\vspace{5mm}
+
+All network files output by functions {\tt WriteExplainedNodesToSifFile()} and {\tt WriteAllExplainedNodesToSifFile()} will contain in their filename the specified hypothesis node name with the +/- direction of regulation.
+
+
+\subsection{Output Suppression, Re-direction and Quiet Mode}
+
+All the functions mentioned in the above section will by default output to the current R working directory, however they can to configured to send outputs to a named directory specified via the {\tt outputDir} parameter (this can accept a path with directory name, if the folder is not to be in working directory). If the specified directory doesn't exist it will be created.
+
+{\tt RankTheHypotheses()} and {\tt runSCANR()} functions have a quiet flag that is set to FALSE by default. Changing this to TRUE will suppress output of some or all results to the screen (depending upon other settings;useful for batch scripted runs). 
+
+Similarly, there are flags to suppress results files creation:
+
+{\tt RankTheHypotheses()} has a writeFile flag set to TRUE so as to write a file by default. When set to {\tt FALSE} no output files are created (useful when outputs are to be stored a workspace object, i.e. via assignment using the {\tt <-} assignment operator.
+
+{\tt runSCANR()} has a {\tt writeResultsFiles} flag which works in a similar way to control writing of the usual SCAN text file outputs. The default {\tt TRUE} setting will result in three text files. {\tt FALSE} will switch this off, i.e. for when results are directed into the R workspace via assignment to an object.
+
+{\tt RunSCANR()} also accepts a further {\tt writeNetworkFiles} flag for control of automated regulator network files generation. This is set to {\tt all} by default.
+
+
+\subsection{Operating Systems}
+
+{\tt CausalR} as a Bioconductor package has been built for Linux, PC and Mac operating systems. Operation and functionality is identical regardless of the OS used.
+
+\subsection{Parallelisation}
+
+The {\tt RankTheHypotheses()} and {\tt RunSCANR()} functions are fully parallelised. Parallelisation can be switched-on by including {\tt doParallel=TRUE} in their parameters. The user can optionally specify the number of cores by setting the {\tt numCores} flag to an integer value (default is {\tt NULL}, whereby the number of available cores will be automatically detected) . See {\tt Appendix B} for further advice on speeding-up {\tt CausalR} processing.
+
+\subsection{Network Filtering}
+
+The {\tt CreateCCG()} function can read an optional node inclusion text file containing a list of node names to filter the network interactions against. \\
+The direction of filtering is controlled by an optional {\tt excludeNodesInFile} parameter to specifiy including ({\tt excludeNodesInFile=FALSE}) only those text file nodes (and their interactions) in the {\tt CCG} network object, or to (default setting) exclude those nodes from all interactions in the {\tt CCG}.
+
+<<eval=FALSE>>=
+CreateCCG(filename, nodeInclusionFile = 'NodesList.txt', 
+                                    excludeNodesInFile = TRUE)
+@
+
+Note that both the influencing and influenced nodes will be searched against across all interactions within the input network. Individual interactions will be included or excluded if one (or both) node name(s) match against any specified within the node inclusion file.
+
 
 
 \newpage
 
 \begin{thebibliography}{9}
 
-\bibitem{tobeSubmitted} Bradley, G. \textit{et al. (to be submitted)}
-\textit{CausalR}: extracting mechanistic sense from high throughput data. 
+\bibitem{submitted} Bradley, G. and Barrett, S.J. \textit{(submitted)}
+\textit{CausalR}: extracting mechanistic sense from genome scale data. Bioinformatics, application note. 
 
 \bibitem{2012a} Chindelevitch, L. \textit{et al.} (2012a)
 Causal reasoning on biological networks: interpreting transcriptional changes. Bioinformatics, 28(8):1114-21.
@@ -804,10 +966,24 @@ runSCANR(ccg, ReadExperimentalData("DifferentialData.txt", ccg),
 @
 
 <<eval=FALSE>>=
-#  Generate a .sif file, testOutput.sif, to visualise a network 
-#  of nodes explained by a specific hypothesis in Cytoscape
-WriteExplainedNodesToSifFile("IL1A", +1, ccg, experimentalData,
-                                       delta, file="testOutput")
+# Indirect Individual Hypothesis Network Generation (after running SCAN)
+WriteExplainedNodesToSifFile("Node1", +1,ccg,experimentalData,delta=2)
+@
+
+<<eval=FALSE>>=
+# Indirect Network Generation for All Hypotheses (after running SCAN)
+scanResults <- runSCANR(ccg, experimentalData, numberOfDeltaToScan=2, 
+  topNumGenes=4,correctPredictionsThreshold=1,
+  writeResultFiles = FALSE, writeNetworkFiles = "none",quiet=FALSE)
+WriteAllExplainedNodesToSifFile(scanResults, ccg, experimentalData, 
+  delta=2, correctlyExplainedOnly = TRUE, quiet = TRUE)
+@
+
+<<eval=FALSE>>=
+# Direct Network Generation for All Hypotheses (whilst running SCAN)
+runSCANR(ccg, experimentalData, numberOfDeltaToScan=2, 
+  topNumGenes=4,correctPredictionsThreshold=1,quiet=TRUE,
+  writeResultFiles = TRUE, writeNetworkFiles = "correct")
 @
 
 \newpage
@@ -837,9 +1013,9 @@ RankTheHypotheses(ccg,experimentalData,delta,
 
 To get the number of processor cores on their system:\\
 
-\textit{Linux} users can use the {\tt lscpu} or {\tt nproc -all} commands.\\
+\textit{Linux} users can use the {\tt lscpu} or {\tt nproc -all} commands. In the absence of user privileges for these, try {\tt grep processor /proc/cpuinfo}. The Linux top command can be used to check existing CPU utilisation.\\
 
-\textit{Windows} users can open open a DOS window and type,\\
+\textit{Windows} users can open a DOS window and type,\\
 
 {\tt WMIC CPU Get DeviceID,NumberOfCores,NumberOfLogicalProcessors} \\ 
 

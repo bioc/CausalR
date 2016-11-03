@@ -27,6 +27,11 @@ is a matrix containing the relationship between each node and the hypothesis.
 The hypothesis provided will be the vertex id of one of the nodes in the network (as an integer). 
 The signOfHypothesis variable should be a 1 or -1, indicating up/down regulation
 }
+\examples{
+network <- system.file(package='CausalR', 'extdata', 'testNetwork.sif')
+cg <- CreateCG(network)
+MakePredictionsFromCG('NodeA', +1, cg, 2)
+}
 \concept{
 CausalR
 }

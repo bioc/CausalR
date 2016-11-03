@@ -5,7 +5,7 @@
 #' @param hypothesisnode hypothesis node ID
 #' @param targetnode target node ID
 #' @param showbothdirs where multiple paths from a positive and negative node, FALSE returns only the shortest. Otherwise both are returned.
-#' @param display if true, echo the rsulting paths to the screen
+#' @param quiet a flag to suppress output to console. FALSE by default.
 #' @return a list of vectors containing the nodes of individual paths
 #' @export
 #' @concept CausalR
@@ -17,7 +17,7 @@
 #' GetShortestPathsFromCCG (ccg, hypothesisnode, targetnode)
 
 
-GetShortestPathsFromCCG <- function(network, hypothesisnode, targetnode, showbothdirs = FALSE, display = TRUE) {
+GetShortestPathsFromCCG <- function(network, hypothesisnode, targetnode, showbothdirs = FALSE, quiet = FALSE) {
     
     if (is.numeric(hypothesisnode)) {
         hypothesis <- hypothesisnode
@@ -75,7 +75,7 @@ GetShortestPathsFromCCG <- function(network, hypothesisnode, targetnode, showbot
         }
     }
     
-    if (display) {
+    if (!quiet) {
         for (i in 1:length(nodesinpath)) {
             for (j in 1:length(nodesinpath[[i]])) {
                 cat(nodesinpath[[i]][j], "\t", sep = "")

@@ -2,7 +2,7 @@
 
 # Copyright: Copyright 2012 - 2013 GSK. All rights reserved
 
-# *** SVN *** LastChanged: $Date: 2016-02-03 10:42:06 +0000 (Wed, 03 Feb 2016) $ Changed By: $Author: pipm $ Version: $Revision: 588 $ Source:
+# *** SVN *** LastChanged: $Date: 2016-08-24 08:36:18 +0100 (Wed, 24 Aug 2016) $ Changed By: $Author: pipm $ Version: $Revision: 627 $ Source:
 # $HeadURL: https://stevenagefs:7777/7412/trunk/RankingHypotheses/test_RankTheHypotheses.R $
 
 # A helper function that will create the CG for the purpose of testing in RankTheHypotheses
@@ -131,6 +131,95 @@ test_RankTheHypothesesProducesTheCorrectOutputWithCCG <- function() {
     checkEquals(resultsTable[6, 7], 1)
     checkEquals(resultsTable[6, 8], 1)
 }
+
+
+test_RankTheHypothesesWritesFileWhenWriteFileIsTrue <- function() {
+    test_CCG <- CausalR::CreateCCG(system.file("testData", "test_network.sif", package = "CausalR"))
+    experimentalData <- CausalR::ReadExperimentalData(system.file("testData", "test_ExperimentalData.txt", package = "CausalR"), test_CCG)
+    
+    tempfile <- tempfile()
+    outputDir <- paste(dirname(tempfile), as.integer(runif(1, 1, 1e9)), sep="-")
+    
+    CausalR::RankTheHypotheses(test_CCG, experimentalData, 2, outputDir = outputDir)
+    
+    # Check one file is produced
+    checkEquals(length(list.files(outputDir)), 1)
+    
+    # Check content is correct
+    resultsTable <- read.table(paste0(outputDir, "//ResultsTable-test_network-test_ExperimentalData-delta2.txt"), stringsAsFactors = FALSE, header = TRUE, sep="\t")
+    
+    checkEquals(dim(resultsTable)[1], 6)
+    checkEquals(dim(resultsTable)[2], 9)
+    checkEquals(resultsTable[1, 1], "node0")
+    checkEquals(resultsTable[1, 2], CausalR:::GetNodeID(test_CCG, "node0"))
+    checkEquals(resultsTable[1, 3], 1)
+    checkEquals(resultsTable[1, 4], 3)
+    checkEquals(resultsTable[1, 5], 3)
+    checkEquals(resultsTable[1, 6], 0)
+    checkEquals(resultsTable[1, 7], 0)
+    checkEquals(resultsTable[1, 8], (1/3))
+    checkEquals(resultsTable[1, 9], 1)
+    checkEquals(resultsTable[2, 1], "node1")
+    checkEquals(resultsTable[2, 2], CausalR:::GetNodeID(test_CCG, "node1"))
+    checkEquals(resultsTable[2, 3], 1)
+    checkEquals(resultsTable[2, 4], 1)
+    checkEquals(resultsTable[2, 5], 1)
+    checkEquals(resultsTable[2, 6], 0)
+    checkEquals(resultsTable[2, 7], 0)
+    checkEquals(resultsTable[2, 8], 2/3)
+    checkEquals(resultsTable[2, 9], 1)
+    checkEquals(resultsTable[3, 1], "node2")
+    checkEquals(resultsTable[3, 2], CausalR:::GetNodeID(test_CCG, "node2"))
+    checkEquals(resultsTable[3, 3], -1)
+    checkEquals(resultsTable[3, 4], 1)
+    checkEquals(resultsTable[3, 5], 1)
+    checkEquals(resultsTable[3, 6], 0)
+    checkEquals(resultsTable[3, 7], 0)
+    checkEquals(resultsTable[3, 8], 1/3)
+    checkEquals(resultsTable[3, 9], 1)
+    checkEquals(resultsTable[4, 1], "node2")
+    checkEquals(resultsTable[4, 2], CausalR:::GetNodeID(test_CCG, "node2"))
+    checkEquals(resultsTable[4, 3], 1)
+    checkEquals(resultsTable[4, 4], -1)
+    checkEquals(resultsTable[4, 5], 0)
+    checkEquals(resultsTable[4, 6], 1)
+    checkEquals(resultsTable[4, 7], 0)
+    checkEquals(resultsTable[4, 8], 1)
+    checkEquals(resultsTable[4, 9], 1)
+    checkEquals(resultsTable[5, 1], "node1")
+    checkEquals(resultsTable[5, 2], CausalR:::GetNodeID(test_CCG, "node1"))
+    checkEquals(resultsTable[5, 3], -1)
+    checkEquals(resultsTable[5, 4], -1)
+    checkEquals(resultsTable[5, 5], 0)
+    checkEquals(resultsTable[5, 6], 1)
+    checkEquals(resultsTable[5, 7], 0)
+    checkEquals(resultsTable[5, 8], 1)
+    checkEquals(resultsTable[5, 9], 1)
+    checkEquals(resultsTable[6, 1], "node0")
+    checkEquals(resultsTable[6, 2], CausalR:::GetNodeID(test_CCG, "node0"))
+    checkEquals(resultsTable[6, 3], -1)
+    checkEquals(resultsTable[6, 4], -3)
+    checkEquals(resultsTable[6, 5], 0)
+    checkEquals(resultsTable[6, 6], 3)
+    checkEquals(resultsTable[6, 7], 0)
+    checkEquals(resultsTable[6, 8], 1)
+    checkEquals(resultsTable[6, 9], 1)
+}
+
+
+test_RankTheHypothesesDoesntWriteFileWhenWriteFileIsFalse <- function() {
+    test_CCG <- CausalR::CreateCCG(system.file("testData", "test_network.sif", package = "CausalR"))
+    experimentalData <- CausalR::ReadExperimentalData(system.file("testData", "test_ExperimentalData.txt", package = "CausalR"), test_CCG)
+    
+    tempfile <- tempfile()
+    outputDir <- paste(dirname(tempfile), as.integer(runif(1, 1, 1e9)), sep="-")
+    
+    CausalR::RankTheHypotheses(test_CCG, experimentalData, 2, outputDir = outputDir, writeFile = FALSE)
+    
+    # Check no file is produced
+    checkEquals(length(list.files(outputDir)), 0)
+}
+
 
 test_RankTheHypothesesProducesTheCorrectOutputWithCGUsingQuarticAlgorithm <- function() {
     test_CG <- CreateCGForTest_RankTheHypotheses()

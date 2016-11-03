@@ -4,6 +4,8 @@
 #' @export
 #' @concept CausalR
 #' @param filename file name of the network file (in .sif file format)
+#' @param nodeInclusionFile optional path to a text file listing nodes to exclude in the CCG (or include - see argument excludeNodesInFile). 
+#' @param excludeNodesInFile flag to determine if nodes in inclusion file should be taken as nodes to include or nodes to exclude. Default is TRUE to exclude.
 #' @return an igraph object containing the CCG.
 #' @examples
 #' # get path to example .sif file
@@ -13,7 +15,7 @@
 
 #' 
 #' 
-#' @usage CreateCCG(filename)
+#' @usage CreateCCG(filename, nodeInclusionFile = NULL, excludeNodesInFile = TRUE)
 #' 
 #' @note CreateCG and CreateCCG create causal and computational causal graphs respectively.
 #' 
@@ -24,7 +26,7 @@
 
 
 
-CreateCCG <- function(filename) {
+CreateCCG <- function(filename, nodeInclusionFile = NULL, excludeNodesInFile = TRUE) {
     # Create a Computational Causal Graph containing separate +ve and -ve nodes from a SIF file
     
     # Note that this is a CCG in the sense that the Chindelevitch et al paper uses.  Generally in this code we use a CCG to mean the matrix of
@@ -32,6 +34,23 @@ CreateCCG <- function(filename) {
     
     
     tableOfInteractions <- ReadSifFileToTable(filename)
+
+    if (!is.null(nodeInclusionFile)) {
+        # If a node 'inclusion file' has been specified get a vector of TRUE/FALSE, where TRUE corresponds
+        # to rows that contain at least one of the nodes listed in the file
+        inclusionNodes <- scan(nodeInclusionFile, what = "", quiet = TRUE)
+        inclusionNodesFound <- tableOfInteractions[,1] %in% inclusionNodes | tableOfInteractions[,3] %in% inclusionNodes 
+        
+        if(excludeNodesInFile) {
+            tableOfInteractions <- tableOfInteractions[!inclusionNodesFound,]
+        } else {
+            tableOfInteractions <- tableOfInteractions[inclusionNodesFound,]
+        }
+    }
+    
+    if(nrow(tableOfInteractions) < 1) {
+        stop("No interactions found in network file (or all interactions are excluded by nodeInclusionFile)")
+    }
     
     nEdges <- dim(tableOfInteractions)[1]
     
@@ -71,6 +90,9 @@ CreateCCG <- function(filename) {
     # Now create the igraph, and add the node names as a property to each vertex
     network <- igraph::graph_from_edgelist(edgeList, TRUE)
     igraph::V(network)$name <- nodeNamesSigned
+    
+    # give the network a name attribute, set to the filename minus the path and file extension
+    network$name <- tools::file_path_sans_ext(basename(filename))
     
     network$isCCG <- TRUE
     igraph::V(network)$unsignedName <- c(nodeNames, nodeNames)

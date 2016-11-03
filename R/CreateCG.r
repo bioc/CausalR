@@ -32,6 +32,9 @@ CreateCG <- function(sifFile) {
     
     network <- AddIDsToVertices(network)
     
+    # give the network a name attribute, set to the filename minus the path and file extension
+    network$name <- tools::file_path_sans_ext(basename(sifFile))
+    
     network$isCCG <- FALSE
     
     return(network)

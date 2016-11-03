@@ -11,6 +11,10 @@
 
 
 GetRegulatedNodes <- function(PPInet, Expressiondata, delta, hypothesisGene = "", signOfHypothesis = 1, outputfile = "") {
+    
+    signOfHypothesis <- as.integer(signOfHypothesis)
+    delta <- as.integer(delta)
+    
     ccg = CreateCCG(PPInet)
     experimentalData = ReadExperimentalData(Expressiondata, ccg)
     # rankedHypothesis=RankTheHypotheses(ccg, experimentalData, delta)

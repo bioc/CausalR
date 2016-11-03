@@ -4,7 +4,7 @@
 #' @export
 #' @concept CausalR
 #' @param network Computational Causal Graph, as an igraph.
-#' @param experimentalData The experimental data read in using \link{ReadExperimentalData}. The results is an n x 2 matrix; where the first column contains the node ids of the nodes in the network that the results refer to. The second column contains values indicating the direction of regulation in the results - (+)1 for up, -1 for down and 0 for insignificant amounts of regulation.
+#' @param experimentalData The experimental data read in using \link{ReadExperimentalData}. The results is an n x 2 matrix; where the first column contains the node ids of the nodes in the network that the results refer to. The second column contains values indicating the direction of regulation in the results - (+)1 for up, -1 for down and 0 for insignificant amounts of regulation. The name of the first column is the filename the data was read from.
 #' @param delta Distance to search within the causal graph.
 #' @param epsilon The threshold that is used when calculating the p-value using the cubic algorithm (see 'Assessing statistical significance in causal graphs').
 #' @param useCubicAlgorithm An indicator specifying which algorithm will be used to calculate the p-value. The default is set as useCubicAlgorithm = TRUE which uses the cubic algorithm. If this value is set as FALSE, the algorithm will use the much slower quartic algorithm which does compute the exact answer, as opposed to using approximations like the cubic algorithm.
@@ -12,23 +12,25 @@
 #' @param symmetricCCG This flag specifies whether the CCG is assumed to be symmetric. The value is set as TRUE as a default. If this is the case the running time of the algorithm is reduced since the bottom half of the table can be filled in using the results of calculations performed earlier.
 #' @param listOfNodes A list of nodes specified by the user. The algorithm will only calculate and store the results for the nodes in the specified list. The default value is NULL; here the algorithm will calculate and store results for all the nodes in the network.
 #' @param correctPredictionsThreshold A threshold on the number of correct predictions for a given hypothesis. If a hypothesis produces fewer correct predictions than predictionsThreshold then the algorithm will not calculate the two p-values. Instead 'NA' will be displayed in the final two columns of the corresponding row of the results table. As a default correctPredictionsThreshold is set as -Inf, so that the p-values are calculated for all specified hypotheses.
-#' @param quiet a flag to supress progress output. FALSE by default.
+#' @param quiet a flag to suppress output to console. FALSE by default.
 #' @param doParallel A flag for running RankTheHypothesis in parallel mode.
 #' @param numCores Number of cores to use if using parallel mode. If the default value of NULL is used, it will attempt to detect the number of cores available and use all of them bar one.
+#' @param writeFile A flag for determining if the output should be written to a file in the working directory. Default is TRUE.
+#' @param outputDir the directory to output the files to. Default is the working directory
 #' @return A data frame containing the results of the algorithm.
 #' @examples
 #' #get path to example network file
-#' network <- system.file(package='CausalR', 'extdata', 'testNetwork.sif')
+#' networkFile <- system.file(package='CausalR', 'extdata', 'testNetwork.sif')
 #' #create ccg
-#' ccg <- CreateCCG(network)
+#' network <- CreateCCG(networkFile)
 #' #get path to example experimental data
-#' fileName<- system.file(package='CausalR', 'extdata', 'testData.txt')
+#' experimentalDataFile <- system.file(package='CausalR', 'extdata', 'testData.txt')
 #' #read in experimetal data
-#' expData<- ReadExperimentalData(fileName, ccg)
+#' experimentalData <- ReadExperimentalData(experimentalDataFile, network)
 #' #run in single threaded mode
-#' RankTheHypotheses(ccg, expData, 2)
+#' RankTheHypotheses(network, experimentalData, 2)
 #' #run in parallel mode
-#' RankTheHypotheses(ccg, expData, 2, doParallel=TRUE, numCores=2)
+#' RankTheHypotheses(network, experimentalData, 2, doParallel=TRUE, numCores=2)
 
 #' @references
 #' L Chindelevitch et al.
@@ -36,8 +38,20 @@
 #' BMC Bioinformatics, 13(35), 2012.
 
 RankTheHypotheses <- function(network, experimentalData, delta, epsilon = 1e-05, useCubicAlgorithm = TRUE, use1bAlgorithm = TRUE, symmetricCCG = TRUE,
-                              listOfNodes = NULL, correctPredictionsThreshold = -Inf, quiet = FALSE, doParallel = FALSE, numCores = NULL) {
-        # Set up timer
+                              listOfNodes = NULL, correctPredictionsThreshold = -Inf, quiet = FALSE, doParallel = FALSE, numCores = NULL, writeFile = TRUE, outputDir = getwd()) {
+    
+    delta <- as.integer(delta)
+    
+    # If outputDir doesn't exist, create it
+    if (!file.exists(file.path(outputDir))){
+        dir.create(file.path(outputDir))
+    }
+    
+    # If CreateCCG was used to create 'network' it should have a name attribute containing the filename used to produce it.
+    # If ReadExperimentalData was used to create 'experimentalData' the name of the first column should be equal to the filename used to produce it
+    fileOutputName <- paste0(network$name, "-", colnames(experimentalData)[1], "-delta", delta)
+    
+    # Set up timer
         timeToRunSoFar <- Sys.time()
         
         if (is.numeric(experimentalData[1, 1])) {
@@ -79,7 +93,10 @@ RankTheHypotheses <- function(network, experimentalData, delta, epsilon = 1e-05,
                 nodesToBeTested <- listOfNodes
             }
         }
-        cat(paste("Number of Nodes to analyse:", numNodesToBeTested, "\n"))
+        
+        if(!quiet) {
+            cat(paste("Number of Nodes to analyse:", numNodesToBeTested, "\n"))
+        }
         
         numPredictions <- nrow(processedExperimentalData)
         # Get the values of n+, n- and n0
@@ -191,12 +208,8 @@ RankTheHypotheses <- function(network, experimentalData, delta, epsilon = 1e-05,
         }
         
         ## First column of scores matrix contains the NodeID
-        if (isCCG) {
-            unsignedNodeNames <- igraph::V(network)$unsignedName[scoresMatrix[,1]]
-        } else {
-            unsignedNodeNames <- igraph::V(network)$name[scoresMatrix[,1]]
-        }
-
+        unsignedNodeNames <- GetNodeName(network, scoresMatrix[,1])
+        
         nodeNames <- unsignedNodeNames
         nodeNames[scoresMatrix[,2] == 1] <- paste0(nodeNames[scoresMatrix[,2] == 1], "+")
         nodeNames[scoresMatrix[,2] == -1] <- paste0(nodeNames[scoresMatrix[,2] == -1], "-")
@@ -209,11 +222,13 @@ RankTheHypotheses <- function(network, experimentalData, delta, epsilon = 1e-05,
         rankedHypotheses <- rankedHypotheses[orderHypotheses,]
         
         # Save results to an text file
-        rhoutput <- scoresMatrix[, c(1, 1:8)]
-        rhoutput[, 1] <- unsignedNodeNames
-        rhoutput <- rhoutput[orderHypotheses,]
-        colnames(rhoutput) <- c("NodeName", "NodeID", "Regulation", "Score", "Correct", "Incorrect", "Ambiguous", "p-value", "Enrichment p-value")
-        utils::write.table(rhoutput, paste(getwd(), "/ResultsTable.txt", sep = ""), sep = "\t", row.names = FALSE, quote = FALSE)
+        if(writeFile) {
+            rhoutput <- scoresMatrix[, c(1, 1:8)]
+            rhoutput[, 1] <- unsignedNodeNames
+            rhoutput <- rhoutput[orderHypotheses,]
+            colnames(rhoutput) <- c("NodeName", "NodeID", "Regulation", "Score", "Correct", "Incorrect", "Ambiguous", "p-value", "Enrichment p-value")
+            utils::write.table(rhoutput, paste0(outputDir, "/ResultsTable-", fileOutputName, ".txt"), sep = "\t", row.names = FALSE, quote = FALSE)
+        }
         
         return(rankedHypotheses)
     }

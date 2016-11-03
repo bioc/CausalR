@@ -4,8 +4,9 @@
 \alias{WriteExplainedNodesToSifFile}
 \title{Write explained nodes to Sif file}
 \usage{
-WriteExplainedNodesToSifFile(hypothesisnode, signOfHypothesis, network, data,
-  delta, file, display = TRUE)
+WriteExplainedNodesToSifFile(hypothesisnode, signOfHypothesis, network,
+  experimentalData, delta, outputDir = getwd(), outputFilesName = "",
+  correctlyExplainedOnly = FALSE, quiet = FALSE)
 }
 \arguments{
 \item{hypothesisnode}{a hypothesis node}
@@ -14,29 +15,35 @@ WriteExplainedNodesToSifFile(hypothesisnode, signOfHypothesis, network, data,
 
 \item{network}{a computational causal graph}
 
-\item{data}{a data file}
+\item{experimentalData}{The experimental data read in using \link{ReadExperimentalData}. The results is an n x 2 matrix; where the first column contains the node ids of the nodes in the network that the results refer to. The second column contains values indicating the direction of regulation in the results - (+)1 for up, -1 for down and 0 for insignificant amounts of regulation. The name of the first column is the filename the data was read from.}
 
 \item{delta}{the number of edges across which the hypothesis should be followed}
 
-\item{file}{a character string (without extension) that determines the names of the files created. Extension is added automatically. Set to NA if not writing to file.}
+\item{outputDir}{the directory to output the files to. Default is the working directory}
 
-\item{display}{determines if the output written to file is also displayed}
+\item{outputFilesName}{a character string to use for the name of the output files. Default value is "", which results in files using the default naming convention of "network file name-data file name-delta value-node name". Set to NA if not writing to file.}
+
+\item{correctlyExplainedOnly}{if TRUE network files will only be produced for correctly explained nodes. If FALSE network files will be produced for each of correctly explained, incorrectly explained and ambiguously explained nodes.}
+
+\item{quiet}{a flag to suppress output to console. FALSE by default.}
 }
 \value{
-two files containing paths from hypothesis node to explained nodes in sif format
+files containing paths from hypothesis node to explained nodes in sif format and corresponding annotation (_anno.txt) files
 }
 \description{
-Outputs a network of explained nodes in .sif file format for producing visualisations using Cytoscape
+Outputs networks of explained nodes in .sif file format for producing visualisations using Cytoscape. Output will be to a
+directory beginning with a timestamp,
 }
 \examples{
 hypothesisnode <- "Node0"
 signOfHypothesis <- +1
-network <- system.file(package='CausalR', 'extdata', 'testNetwork1.sif')
-ccg <- CreateCCG(network)
-data <- system.file(package='CausalR', 'extdata', 'testData1.txt')
+networkFile <- system.file(package='CausalR', 'extdata', 'testNetwork1.sif')
+network <- CreateCCG(networkFile)
+experimentalDataFile <- system.file(package='CausalR', 'extdata', 'testData1.txt')
+experimentalData <- ReadExperimentalData(experimentalDataFile, network)
 delta <- 2
-WriteExplainedNodesToSifFile(hypothesisnode, signOfHypothesis, ccg, data,  delta,
-                             file=NA, display=TRUE)
+WriteExplainedNodesToSifFile(hypothesisnode, signOfHypothesis, network, experimentalData, delta,
+                             outputFilesName=NA)
 }
 \concept{
 CausalR

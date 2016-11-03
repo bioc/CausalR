@@ -6,7 +6,7 @@
 \alias{CausalR-package}
 \title{The CausalR package}
 \description{
-Causal Reasoning algorithms for biological networks, including predictions, scoring, p-value calculation and ranking.
+Causal network analysis methods for regulator prediction and network reconstruction from genome scale data.
 }
 \details{
 The most important functions are:
@@ -16,16 +16,19 @@ The most important functions are:
     \item{\code{\link{MakePredictions}}: make causal reasoning predictions from a CCG}
     \item{\code{\link{ScoreHypothesis}}: score causal reasoning predictions}
     \item{\code{\link{CalculateSignificance}}: calculate statisitical significance of a result}
-    \item{\code{\link{RankTheHypotheses}}: compare different possible hypotheses on a single CCG}
+    \item{\code{\link{RankTheHypotheses}}: compare different possible regulatory hypotheses on a single CCG}
+    \item{\code{\link{runSCANR}}: reduce false positives by selecting common hypotheses across pathlengths}
+    \item{\code{\link{WriteExplainedNodesToSifFile}}: reconstruct hypothesis specific regulatory network}
 }
 }
 \author{
 {
-    David Riley \email{david.riley@tessella.com}, Chirag Mistry, Mark Pipe
+    Glyn Bradley, Steven J. Barrett, Chirag Mistry, Mark Pipe, David Riley, David Wille, Bhushan Bonde, Peter Woollard
 }
 }
 \references{
 \itemize{
+    \item{"CausalR - extracting mechanistic sense from genome scale data", Bradley, G. and Barrett, S.J., Application note, Bioinformatics (\emph{submitted})}
     \item{"Causal reasoning on biological networks: interpreting transcriptional changes", Chindelevitch \emph{et al.}, Bioinformatics \bold{28} 1114 (2012). doi:\href{http://dx.doi.org/10.1093/bioinformatics/bts090}{10.1093/bioinformatics/bts090}}
     \item{"Assessing statistical significance in causal graphs", Chindelevitch \emph{et al.}, BMC Bioinformatics \bold{13} 35 (2012). doi:\href{http://dx.doi.org/10.1186/1471-2105-13-35}{10.1186/1471-2105-13-35}}
 }
