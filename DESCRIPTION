@@ -1,0 +1,18 @@
+Package: CausalR
+Type: Package
+Title: Causal network analysis methods
+Version: 1.7.3
+Date: 2016-11-03
+Author: Glyn Bradley, Steven Barrett, Chirag Mistry, Mark Pipe, David Wille, David Riley, Bhushan Bonde, Peter Woollard
+Maintainer: Glyn Bradley <glyn.x.bradley@gsk.com>, Steven Barrett <steven.j.barrett@gsk.com>
+Description: Causal network analysis methods for regulator prediction and network reconstruction from genome scale data.
+Depends: R (>= 3.3.0)
+Imports: igraph
+Suggests: knitr, RUnit, BiocGenerics
+VignetteBuilder: knitr
+biocViews: GraphAndNetwork, Network, Microarray,
+        DifferentialExpression, RNASeq
+License: GPL (>= 2)
+NeedsCompilation: no
+RoxygenNote: 5.0.1
+Packaged: 2016-11-10 15:41:37 UTC; gb464955
